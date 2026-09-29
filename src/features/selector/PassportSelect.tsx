@@ -3,6 +3,8 @@ import type { Country } from '../../data/schema.ts';
 
 interface Props {
   label: string;
+  // Shown in the empty field. Defaults to the label.
+  placeholder?: string;
   countries: Country[];
   value: string | null;
   exclude?: string | null;
@@ -16,7 +18,7 @@ const normalise = (text: string) =>
     .toLowerCase();
 
 // Searchable combobox following the WAI-ARIA "list autocomplete" pattern.
-export function PassportSelect({ label, countries, value, exclude, onChange }: Props) {
+export function PassportSelect({ label, placeholder, countries, value, exclude, onChange }: Props) {
   const id = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
@@ -74,7 +76,7 @@ export function PassportSelect({ label, countries, value, exclude, onChange }: P
         aria-activedescendant={open && options[active] ? `${id}-option-${active}` : undefined}
         autoComplete="off"
         spellCheck={false}
-        placeholder={open && current ? current.name : label}
+        placeholder={open && current ? current.name : (placeholder ?? label)}
         value={open ? query : (current?.name ?? '')}
         onChange={(e) => {
           setQuery(e.target.value);

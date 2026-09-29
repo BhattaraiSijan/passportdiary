@@ -8,7 +8,7 @@ import {
   sourceLabel,
 } from '../../data/labels.ts';
 import type { Country, Requirement } from '../../data/schema.ts';
-import { CATEGORY_COLORS } from '../../map/colors.ts';
+import { useTheme } from '../../designs/themes.ts';
 import { useStore } from '../../state/store.ts';
 import type { View } from '../../state/useView.ts';
 
@@ -24,13 +24,14 @@ function RequirementCard({
   passport: Country;
   requirement: Requirement;
 }) {
+  const theme = useTheme();
   const stay = formatStay(requirement.maxStayDays);
   const hasRule = requirement.category !== 'citizen' && requirement.category !== 'unknown';
   return (
-    <article className="requirement">
+    <article className="requirement" data-category={requirement.category}>
       <h3>With a passport from {passport.name}</h3>
       <p className="verdict">
-        <span className="swatch" style={{ background: CATEGORY_COLORS[requirement.category] }} />
+        <span className="swatch" style={{ background: theme.categories[requirement.category] }} />
         {CATEGORY_LABELS[requirement.category]}
       </p>
       <p>{CATEGORY_HELP[requirement.category]}</p>

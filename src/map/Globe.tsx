@@ -5,6 +5,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import {
   Layer,
   Map as MapView,
+  NavigationControl,
   Source,
   type MapLayerMouseEvent,
   type MapRef,
@@ -15,17 +16,20 @@ import type { PaddingOptions } from 'maplibre-gl';
 import { CATEGORY_LABELS } from '../data/labels.ts';
 import { useStore } from '../state/store.ts';
 import type { View } from '../state/useView.ts';
-import { BORDER, CATEGORY_COLORS, DIFFERENCE_COLORS, NO_DATA_LAND, OCEAN } from './colors.ts';
+import { useDesign } from '../designs/design.ts';
+import { useTheme, type MapTheme } from '../designs/themes.ts';
+import { designFrame, globeRadius, graticule } from './frame.ts';
 import { colorExpression, memberExpression, opacityExpression } from './layers.ts';
 
 maplibregl.setWorkerUrl(workerUrl);
 
-const STYLE: StyleSpecification = {
+// The ocean is a layer of its own, below, so its colour can change with the state.
+const styleFor = (theme: MapTheme): StyleSpecification => ({
   version: 8,
   sources: {},
-  layers: [{ id: 'ocean', type: 'background', paint: { 'background-color': OCEAN } }],
-  sky: { 'atmosphere-blend': 0 },
-};
+  layers: [],
+  sky: theme.sky,
+});
 
 const INTERACTIVE = ['markers', 'countries'];
 const HATCH = 'hatch';
@@ -61,12 +65,12 @@ function frame(map: MapRef): { zoom: number; padding: PaddingOptions } {
 }
 
 // Diagonal stripes drawn over places where the sources disagree.
-function hatchImage(): ImageData {
+function hatchImage(color: MapTheme['hatch']): ImageData {
   const size = 8;
   const data = new Uint8ClampedArray(size * size * 4);
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
-      if ((x + y) % size < 2) data.set([22, 58, 117, 190], (y * size + x) * 4);
+      if ((x + y) % size < 2) data.set(color, (y * size + x) * 4);
     }
   }
   return new ImageData(data, size, size);
@@ -82,7 +86,26 @@ interface Hover {
   y: number;
 }
 
-export default function Globe({ view, sideOpen }: { view: View | null; sideOpen: boolean }) {
+// Tells the stylesheet where the globe is, so a ring or glow can sit behind it.
+function publish(map: maplibregl.Map): void {
+  const container = map.getContainer();
+  const { top = 0, bottom = 0, left = 0, right = 0 } = map.getPadding();
+  const radius = globeRadius(map.getZoom(), map.getCenter().lat, container.clientHeight);
+  const host = container.closest<HTMLElement>('.globe');
+  if (!host) return;
+  host.style.setProperty('--globe-x', `${(left + (container.clientWidth - left - right) / 2).toFixed(1)}px`);
+  host.style.setProperty('--globe-y', `${(top + (container.clientHeight - top - bottom) / 2).toFixed(1)}px`);
+  host.style.setProperty('--globe-r', `${radius.toFixed(1)}px`);
+}
+
+interface Props {
+  view: View | null;
+  sideOpen: boolean;
+  // Changes whenever a surface the globe must stay clear of changes size.
+  reframe?: string;
+}
+
+export default function Globe({ view, sideOpen, reframe = '' }: Props) {
   const base = useStore((s) => s.base)!;
   const selected = useStore((s) => s.selected);
   const select = useStore((s) => s.select);
@@ -90,8 +113,20 @@ export default function Globe({ view, sideOpen }: { view: View | null; sideOpen:
   const compareMode = useStore((s) => s.compareMode);
   const passportA = useStore((s) => s.passportA);
 
+  const design = useDesign();
+  const theme = useTheme();
+  const style = useMemo(() => styleFor(theme), [theme]);
+  const lines = useMemo(() => (theme.graticule ? graticule() : null), [theme]);
+  // Where the page scrolls under the globe, the wheel scrolls the page and the buttons zoom.
+  // Until a passport is chosen the globe is an emblem, drawn in the brand colours.
+  const idle = design !== 0 && !sideOpen;
+  const ocean = idle ? theme.idle.ocean : theme.ocean;
+  const pageScrolls = design === 2 && sideOpen && window.matchMedia('(min-width: 821px)').matches;
+
   const hasView = view !== null;
   const mapRef = useRef<MapRef>(null);
+  const heading = useRef<[number, number] | null>(null);
+  const zoomedByHand = useRef(false);
   const [loaded, setLoaded] = useState(false);
   const [contextLost, setContextLost] = useState(false);
   const [hover, setHover] = useState<Hover | null>(null);
@@ -120,37 +155,61 @@ export default function Globe({ view, sideOpen }: { view: View | null; sideOpen:
       const key = showDifference ? cell.difference! : cell.category;
       colors.set(
         code,
-        showDifference ? DIFFERENCE_COLORS[cell.difference!] : CATEGORY_COLORS[cell.category],
+        showDifference ? theme.differences[cell.difference!] : theme.categories[cell.category],
       );
       if (filter === key) highlighted.push(code);
       if (cell.conflicting && !showDifference) conflicting.push(code);
     }
     return {
-      color: colorExpression(colors, NO_DATA_LAND),
+      color: colorExpression(colors, idle ? theme.idle.land : theme.noData),
       opacity: opacityExpression(filter ? highlighted : null),
       conflicting: memberExpression(conflicting),
     };
-  }, [view, filter, showDifference]);
+  }, [view, filter, showDifference, theme, idle]);
 
   const moveTo = useCallback(
     (center: [number, number] | undefined, minZoom?: number) => {
       const map = mapRef.current;
       if (!map) return;
-      const { zoom: fit, padding } = frame(map);
-      const zoom = Math.max(map.getZoom(), minZoom ?? fit);
+      // A move that is still under way keeps its destination when the globe is re-framed.
+      if (center) heading.current = center;
+      else if (map.isMoving() && heading.current) center = heading.current;
+
+      let zoom: number;
+      let padding: PaddingOptions;
+      if (design === 0) {
+        const framed = frame(map);
+        zoom = Math.max(map.getZoom(), minZoom ?? framed.zoom);
+        padding = framed.padding;
+      } else {
+        const framed = designFrame(map.getMap(), theme.fill);
+        center ??= framed.center;
+        // A sheet may cover the lower part of the globe. Turn the globe so the
+        // place shows above the sheet, or move the globe up when zoomed in close.
+        const close = minZoom !== undefined;
+        if (center && !close && framed.look) {
+          center = [center[0], Math.max(-80, center[1] - framed.look)];
+        }
+        padding = close ? framed.shifted : framed.padding;
+        const fit = framed.zoomAt(center?.[1] ?? map.getCenter().lat);
+        // The globe returns to the size that fits, unless the person has zoomed by hand.
+        zoom = zoomedByHand.current
+          ? Math.max(map.getZoom(), minZoom ?? fit)
+          : Math.max(fit, minZoom ?? fit);
+      }
       const target = { ...(center ? { center } : {}), zoom, padding };
       if (reducedMotion()) map.jumpTo(target);
       else map.easeTo({ ...target, duration: 900 });
     },
     // The panels that frame() measures come and go with these two.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [sideOpen, hasView],
+    [sideOpen, hasView, design, theme],
   );
 
   // Re-frame when a panel appears or disappears.
   useEffect(() => {
     if (loaded) moveTo(undefined);
-  }, [loaded, moveTo]);
+  }, [loaded, moveTo, reframe]);
 
   useEffect(() => {
     const country = passportA ? base.byId.get(passportA) : undefined;
@@ -182,17 +241,31 @@ export default function Globe({ view, sideOpen }: { view: View | null; sideOpen:
     const map = mapRef.current?.getMap();
     if (!map) return;
     if (import.meta.env.DEV) (window as unknown as { __map: unknown }).__map = map;
-    if (!map.hasImage(HATCH)) map.addImage(HATCH, hatchImage());
-    map.jumpTo(frame(mapRef.current!));
+    if (!map.hasImage(HATCH)) map.addImage(HATCH, hatchImage(theme.hatch));
+    map.jumpTo(design === 0 ? frame(mapRef.current!) : designFrame(map, theme.fill));
+    if (design !== 0) {
+      publish(map);
+      map.on('move', () => publish(map));
+      map.on('zoom', (e) => {
+        if ((e as { originalEvent?: Event }).originalEvent) zoomedByHand.current = true;
+      });
+    }
     const canvas = map.getCanvas();
     canvas.addEventListener('webglcontextlost', () => setContextLost(true));
     canvas.addEventListener('webglcontextrestored', () => setContextLost(false));
     setLoaded(true);
-  }, []);
+  }, [design, theme]);
 
   const onResize = useCallback(() => {
-    if (mapRef.current) mapRef.current.jumpTo(frame(mapRef.current));
-  }, []);
+    const map = mapRef.current;
+    if (!map) return;
+    if (design === 0) map.jumpTo(frame(map));
+    else {
+      const framed = designFrame(map.getMap(), theme.fill);
+      const zoom = zoomedByHand.current ? Math.max(map.getZoom(), framed.zoom) : framed.zoom;
+      map.jumpTo({ zoom, padding: framed.padding, ...(framed.center ? { center: framed.center } : {}) });
+    }
+  }, [design, theme]);
 
   const onMouseMove = useCallback((e: MapLayerMouseEvent) => {
     const p = e.features?.[0]?.properties as
@@ -216,7 +289,7 @@ export default function Globe({ view, sideOpen }: { view: View | null; sideOpen:
       <MapView
         ref={mapRef}
         mapLib={maplibregl}
-        mapStyle={STYLE}
+        mapStyle={style}
         projection="globe"
         initialViewState={{ longitude: 60, latitude: 20, zoom: 1 }}
         minZoom={0.6}
@@ -227,6 +300,7 @@ export default function Globe({ view, sideOpen }: { view: View | null; sideOpen:
         touchPitch={false}
         pixelRatio={Math.min(window.devicePixelRatio, 2)}
         attributionControl={false}
+        cooperativeGestures={pageScrolls}
         interactiveLayerIds={loaded ? INTERACTIVE : []}
         cursor={hover ? 'pointer' : 'grab'}
         onLoad={onLoad}
@@ -235,6 +309,21 @@ export default function Globe({ view, sideOpen }: { view: View | null; sideOpen:
         onMouseLeave={() => setHover(null)}
         onClick={onClick}
       >
+        <Layer id="ocean" type="background" paint={{ 'background-color': ocean }} />
+        {pageScrolls && <NavigationControl position="top-left" showCompass={false} />}
+        {lines && theme.graticule && (
+          <Source id="graticule" type="geojson" data={lines}>
+            <Layer
+              id="graticule"
+              type="line"
+              paint={{
+                'line-color': theme.graticule.color,
+                'line-opacity': theme.graticule.opacity,
+                'line-width': 0.6,
+              }}
+            />
+          </Source>
+        )}
         <Source id="world" type="geojson" data={base.world} promoteId="id">
           <Layer
             id="countries"
@@ -252,14 +341,18 @@ export default function Globe({ view, sideOpen }: { view: View | null; sideOpen:
           <Layer
             id="borders"
             type="line"
-            paint={{ 'line-color': BORDER, 'line-width': 0.6, 'line-opacity': 0.55 }}
+            paint={{
+              'line-color': idle ? theme.idle.border : theme.border,
+              'line-width': theme.borderWidth,
+              'line-opacity': idle ? theme.idle.borderOpacity : theme.borderOpacity,
+            }}
           />
           <Layer
             id="outline"
             type="line"
             layout={{ 'line-join': 'round' }}
             paint={{
-              'line-color': '#ffffff',
+              'line-color': theme.outline,
               'line-width': [
                 'case',
                 ['boolean', ['feature-state', 'selected'], false],
@@ -279,7 +372,9 @@ export default function Globe({ view, sideOpen }: { view: View | null; sideOpen:
             paint={{
               'circle-color': paint.color,
               'circle-radius': ['interpolate', ['linear'], ['zoom'], 1, 3.5, 4, 7],
-              'circle-stroke-color': ['case', paint.conflicting, BORDER, '#ffffff'],
+              'circle-stroke-color': idle
+                ? theme.idle.border
+                : ['case', paint.conflicting, theme.border, theme.markerStroke],
               'circle-stroke-width': ['case', paint.conflicting, 2, 1],
               'circle-opacity': ['interpolate', ['linear'], ['zoom'], 3.5, 1, 5, 0],
               'circle-stroke-opacity': ['interpolate', ['linear'], ['zoom'], 3.5, 1, 5, 0],

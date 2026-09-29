@@ -1,4 +1,5 @@
 import { Component, Suspense, lazy, type ReactNode } from 'react';
+import { useDesign } from '../designs/design.ts';
 import type { View } from '../state/useView.ts';
 
 // MapLibre is the largest dependency, so it loads after the selector and list are usable.
@@ -29,7 +30,14 @@ class GlobeBoundary extends Component<{ children: ReactNode }, { failed: boolean
 
 const webgl2 = supportsWebGL2();
 
-export function GlobeStage({ view, sideOpen }: { view: View | null; sideOpen: boolean }) {
+interface Props {
+  view: View | null;
+  sideOpen: boolean;
+  reframe?: string;
+}
+
+export function GlobeStage({ view, sideOpen, reframe }: Props) {
+  const design = useDesign();
   if (!webgl2) {
     return (
       <p className="globe-message" role="status">
@@ -40,7 +48,8 @@ export function GlobeStage({ view, sideOpen }: { view: View | null; sideOpen: bo
   return (
     <GlobeBoundary>
       <Suspense fallback={<p className="globe-message">Loading the globe…</p>}>
-        <Globe view={view} sideOpen={sideOpen} />
+        {/* Each design draws its own globe, so switching design starts a fresh map. */}
+        <Globe key={design} view={view} sideOpen={sideOpen} reframe={reframe} />
       </Suspense>
     </GlobeBoundary>
   );

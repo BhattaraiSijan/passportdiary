@@ -23,6 +23,18 @@ export const CATEGORY_HELP: Record<RequirementCategory, string> = {
   unknown: 'We have no entry rules for this place.',
 };
 
+// One short line per category, for keys where space is tight.
+export const CATEGORY_SHORT_HELP: Record<RequirementCategory, string> = {
+  citizen: 'The country that issued the passport',
+  visa_free: 'Enter without a visa',
+  visa_on_arrival: 'Get the visa at the border',
+  eta: 'A quick online form before you travel',
+  evisa: 'Apply online before you travel',
+  visa_required: 'Apply at an embassy before you travel',
+  no_admission: 'Entry is refused',
+  unknown: 'We have no entry rules for this place',
+};
+
 export const CONFIDENCE_LABELS: Record<Confidence, string> = {
   high: 'Two sources agree',
   medium: 'One source only',

@@ -5,7 +5,7 @@ import type { Meta } from '../../data/schema.ts';
 export function Credits({ meta }: { meta: Meta }) {
   const dialog = useRef<HTMLDialogElement>(null);
   return (
-    <footer className="footer">
+    <footer className="footer" data-frame="bottom">
       <p>
         Data as of {formatDate(meta.dataAsOf)}. Check official sources before you travel. Visa
         data:{' '}

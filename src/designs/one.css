@@ -1,0 +1,405 @@
+/* Direction 1: Visa page
+   A printed travel document. Cool paper, blue ink, a green stamp. The globe is a
+   plate in the middle; the key and the list are two facing pages of equal size. */
+
+@import '@fontsource-variable/besley';
+@import '@fontsource-variable/public-sans';
+
+:root[data-design='1'] {
+  --blue: #21509f;
+  --blue-deep: #173c7c;
+  --blue-ink: #10264d;
+  --blue-wash: #e8eef9;
+  --green: #6ecb93;
+  --green-deep: #2b8454;
+  --paper: #ffffff;
+  --bg: #f0f4fa;
+  --ink: #10264d;
+  --ink-soft: #485a7e;
+  --line: #ccd7ea;
+  --edge: 1px solid #21509f;
+  --edge-soft: 1px solid var(--line);
+  --focus: #21509f;
+  --header-ink: #10264d;
+  --header-soft: #485a7e;
+  --stage-ink: #10264d;
+  --stage-soft: #485a7e;
+  --swatch-edge: rgb(16 38 77 / 0.45);
+  --start-edge: #21509f;
+  --start-ring: rgb(110 203 147 / 0.55);
+  --example-edge: #8fa6cf;
+  --example-hover: #ffffff;
+  --radius: 14px;
+  --page: clamp(300px, 23vw, 400px);
+  --font-display: 'Besley Variable', Georgia, serif;
+  --font-text: 'Public Sans Variable', system-ui, sans-serif;
+}
+
+/* Fine wavy lines, as on the pages of a passport. */
+:root[data-design='1'] body {
+  background-color: var(--bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='28' viewBox='0 0 160 28'%3E%3Cg fill='none' stroke='%2321509f' stroke-width='.7' stroke-opacity='.11'%3E%3Cpath d='M0 14c20-16 60-16 80 0s60 16 80 0'/%3E%3Cpath d='M0 14c20 16 60 16 80 0s60-16 80 0'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+:root[data-design='1'] .header {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  gap: 10px;
+  padding: 16px var(--gutter) 12px;
+  text-align: center;
+}
+
+:root[data-design='1'] .header h1 {
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--blue);
+}
+
+:root[data-design='1'] .is-empty .header {
+  gap: 18px;
+  padding-top: 22px;
+}
+
+:root[data-design='1'] .intro h2 {
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+
+:root[data-design='1'] .select input,
+:root[data-design='1'] .search input {
+  border-radius: 8px;
+}
+
+:root[data-design='1'] .header .button-quiet {
+  color: var(--blue);
+  background: var(--paper);
+  border: 1px solid #8fa6cf;
+}
+
+:root[data-design='1'] .header .button-quiet:hover {
+  background: var(--blue-wash);
+}
+
+:root[data-design='1'] .button {
+  color: var(--blue-ink);
+}
+
+:root[data-design='1'] .segmented label span {
+  color: var(--blue);
+  background: var(--paper);
+  border: 1px solid #8fa6cf;
+}
+
+:root[data-design='1'] .segmented input:checked + span {
+  color: var(--blue-ink);
+  background: var(--green);
+  border-color: var(--green-deep);
+}
+
+:root[data-design='1'] .segmented input:focus-visible + span {
+  outline-color: var(--blue);
+}
+
+/* The plate: a ruled ring around the globe, as around a printed hemisphere. */
+:root[data-design='1'] .globe::before,
+:root[data-design='1'] .globe::after {
+  content: '';
+  position: absolute;
+  left: var(--globe-x, 50%);
+  top: var(--globe-y, 50%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+:root[data-design='1'] .globe::before {
+  width: calc(2 * var(--globe-r, 0px) + 14px);
+  height: calc(2 * var(--globe-r, 0px) + 14px);
+  background: var(--paper);
+  border: 1px solid var(--blue);
+}
+
+:root[data-design='1'] .globe::after {
+  width: calc(2 * var(--globe-r, 0px) + 40px);
+  height: calc(2 * var(--globe-r, 0px) + 40px);
+  background: repeating-conic-gradient(var(--blue) 0 0.35deg, transparent 0.35deg 5deg);
+  opacity: 0.55;
+  mask: radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 7px));
+}
+
+:root[data-design='1'] .globe .maplibregl-map {
+  z-index: 1;
+}
+
+:root[data-design='1'] .tooltip {
+  background: var(--blue-ink);
+  border: 1px solid #ffffff;
+}
+
+:root[data-design='1'] .footer {
+  margin-top: 8px;
+  color: var(--ink-soft);
+  border-top: 1px solid var(--line);
+}
+
+:root[data-design='1'] .footer a,
+:root[data-design='1'] .footer .link {
+  color: var(--blue);
+}
+
+/* Start screen: the cover of the passport. Blue cloth, the globe as its emblem. */
+
+:root[data-design='1'] .app {
+  transition: background-color 0.4s ease;
+}
+
+:root[data-design='1'] .app.is-empty {
+  --header-ink: #ffffff;
+  --header-soft: #dfe8fa;
+  --stage-ink: #ffffff;
+  --stage-soft: #dfe8fa;
+  --swatch-edge: rgb(255 255 255 / 0.8);
+  --start-edge: #10264d;
+  --start-ring: var(--green);
+  --example-edge: rgb(255 255 255 / 0.65);
+  --example-hover: var(--blue-deep);
+  --focus: #ffffff;
+  background-color: var(--blue);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='28' viewBox='0 0 160 28'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='.7' stroke-opacity='.1'%3E%3Cpath d='M0 14c20-16 60-16 80 0s60 16 80 0'/%3E%3Cpath d='M0 14c20 16 60 16 80 0s60-16 80 0'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+:root[data-design='1'] .is-empty .header h1 {
+  color: #ffffff;
+}
+
+:root[data-design='1'] .is-empty .globe::before {
+  background: transparent;
+  border-color: var(--green);
+}
+
+:root[data-design='1'] .is-empty .globe::after {
+  background: repeating-conic-gradient(var(--green) 0 0.35deg, transparent 0.35deg 5deg);
+  opacity: 0.9;
+}
+
+:root[data-design='1'] .is-empty .footer {
+  color: #dfe8fa;
+  border-top-color: rgb(255 255 255 / 0.35);
+}
+
+:root[data-design='1'] .is-empty .footer a,
+:root[data-design='1'] .is-empty .footer .link {
+  color: #ffffff;
+}
+
+/* Pages */
+
+:root[data-design='1'] .brief,
+:root[data-design='1'] .side {
+  background: var(--paper);
+  border: var(--edge);
+  border-radius: var(--radius);
+}
+
+:root[data-design='1'] .brief {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 18px 18px 14px;
+}
+
+:root[data-design='1'] .summary {
+  display: grid;
+  gap: 6px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+:root[data-design='1'] .summary h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+:root[data-design='1'] .summary p {
+  font-size: 0.9375rem;
+  color: var(--ink-soft);
+}
+
+:root[data-design='1'] .summary .figure {
+  display: block;
+  font-size: 2.7rem;
+  font-weight: 650;
+  line-height: 1;
+  color: var(--blue);
+}
+
+:root[data-design='1'] .legend {
+  position: static;
+  gap: 2px;
+  padding: 0;
+  font-size: 0.9375rem;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  transform: none;
+}
+
+:root[data-design='1'] .legend-item,
+:root[data-design='1'] .legend-note {
+  gap: 0 10px;
+  padding: 5px 8px;
+}
+
+:root[data-design='1'] .legend-item .swatch {
+  align-self: start;
+  margin-top: 3px;
+}
+
+:root[data-design='1'] .legend-item > span:nth-child(2) {
+  font-weight: 600;
+}
+
+:root[data-design='1'] .legend-item[aria-pressed='true'] .legend-help {
+  color: #dbe6fa;
+}
+
+:root[data-design='1'] .legend-item[aria-pressed='true'] .legend-bar {
+  background: rgb(255 255 255 / 0.25);
+}
+
+:root[data-design='1'] .legend-note {
+  font-size: var(--step--1);
+}
+
+:root[data-design='1'] .swatch-hatch {
+  background: repeating-linear-gradient(135deg, #ffffff 0 2px, var(--blue) 2px 5px);
+}
+
+:root[data-design='1'] .hint {
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+:root[data-design='1'] .list-tools {
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+:root[data-design='1'] .group h3 {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 650;
+}
+
+/* The answer is stamped on the page. */
+:root[data-design='1'] .requirement {
+  --stamp: var(--blue);
+  border-radius: 10px;
+}
+
+:root[data-design='1'] .requirement[data-category='visa_free'],
+:root[data-design='1'] .requirement[data-category='visa_on_arrival'] {
+  --stamp: #1f7446;
+}
+
+:root[data-design='1'] .requirement[data-category='eta'] {
+  --stamp: #7a5a00;
+}
+
+:root[data-design='1'] .requirement[data-category='no_admission'],
+:root[data-design='1'] .requirement[data-category='unknown'] {
+  --stamp: #4a4450;
+}
+
+:root[data-design='1'] .requirement[data-category='citizen'] {
+  --stamp: var(--blue-ink);
+}
+
+:root[data-design='1'] .verdict {
+  justify-self: start;
+  padding: 6px 14px 6px 10px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--stamp);
+  border: 1.5px solid var(--stamp);
+  border-radius: 8px;
+  outline: 1px solid var(--stamp);
+  outline-offset: 2px;
+  transform: rotate(-1.5deg);
+}
+
+:root[data-design='1'] .verdict .swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+/* Wide screens: two facing pages with the globe between them */
+
+@media (min-width: 1101px) {
+  :root[data-design='1'] .brief,
+  :root[data-design='1'] .side {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    z-index: 2;
+    width: var(--page);
+    overflow-y: auto;
+  }
+
+  :root[data-design='1'] .brief {
+    left: var(--gutter);
+  }
+
+  :root[data-design='1'] .side {
+    inset: 4px var(--gutter) 4px auto;
+  }
+
+  :root[data-design='1'] .brief .hint {
+    margin-top: auto;
+  }
+}
+
+/* In between: too narrow for two pages beside the globe, so they go below it. */
+
+@media (min-width: 821px) and (max-width: 1100px) {
+  :root[data-design='1'] .app {
+    height: auto;
+    min-height: 100%;
+  }
+
+  :root[data-design='1'] .stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 16px;
+    padding: 0 var(--gutter);
+  }
+
+  :root[data-design='1'] .globe-area {
+    position: relative;
+    inset: auto;
+    grid-column: 1 / -1;
+    height: min(70vh, 640px);
+  }
+
+  :root[data-design='1'] .brief,
+  :root[data-design='1'] .side {
+    position: static;
+    width: auto;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 820px) {
+  :root[data-design='1'] .header h1 {
+    font-size: 1.4rem;
+  }
+
+  :root[data-design='1'] .globe::after {
+    width: calc(2 * var(--globe-r, 0px) + 30px);
+    height: calc(2 * var(--globe-r, 0px) + 30px);
+    mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px));
+  }
+}

@@ -1,0 +1,524 @@
+/* Direction 3: Night flight
+   The earth from a window seat at night. The globe fills the screen; the places
+   that are easy to enter are lit. One dock under the globe holds the key, and the
+   list or a country opens out of it. */
+
+@import '@fontsource-variable/bricolage-grotesque';
+@import '@fontsource-variable/figtree';
+
+:root[data-design='3'] {
+  --blue: #9cc0ff;
+  --brand: #2a5cb4;
+  --blue-deep: #1b3f86;
+  --blue-ink: #071430;
+  --blue-wash: rgb(255 255 255 / 0.09);
+  --green: #74dba0;
+  --green-deep: #3fa56d;
+  --paper: #0f2450;
+  --bg: #0a1a3c;
+  --ink: #f0f4ff;
+  --ink-soft: #b7c6e8;
+  --line: rgb(255 255 255 / 0.16);
+  --edge: 1px solid rgb(255 255 255 / 0.34);
+  --edge-soft: 1px solid var(--line);
+  --warn: #f6dc93;
+  --warn-wash: rgb(246 220 147 / 0.1);
+  --focus: #74dba0;
+  --header-ink: #ffffff;
+  --header-soft: #c5d3f0;
+  --field-ink: #ffffff;
+  --stage-ink: #ffffff;
+  --stage-soft: #c5d3f0;
+  --swatch-edge: rgb(255 255 255 / 0.55);
+  --start-edge: #74dba0;
+  --start-ring: rgb(116 219 160 / 0.3);
+  --example-edge: rgb(255 255 255 / 0.45);
+  --example-hover: rgb(255 255 255 / 0.12);
+  --radius: 16px;
+  --font-display: 'Bricolage Grotesque Variable', system-ui, sans-serif;
+  --font-text: 'Figtree Variable', system-ui, sans-serif;
+  color-scheme: dark;
+}
+
+:root[data-design='3'] body {
+  background:
+    radial-gradient(120% 90% at 50% 45%, #1d4288 0%, #12306b 38%, #0a1a3c 78%) fixed,
+    var(--bg);
+}
+
+:root[data-design='3'] a {
+  color: var(--blue);
+}
+
+:root[data-design='3'] .header h1 {
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+:root[data-design='3'] .intro h2 {
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+:root[data-design='3'] .select input,
+:root[data-design='3'] .search input {
+  color: var(--ink);
+  background: rgb(9 24 58 / 0.72);
+  border: 1px solid rgb(255 255 255 / 0.45);
+  border-radius: 99px;
+}
+
+:root[data-design='3'] .header .select input {
+  padding-left: 16px;
+}
+
+:root[data-design='3'] .select input::placeholder,
+:root[data-design='3'] .search input::placeholder {
+  color: var(--ink-soft);
+}
+
+:root[data-design='3'] .is-empty .header .select input {
+  padding-left: 22px;
+  background: rgb(9 24 58 / 0.85);
+}
+
+:root[data-design='3'] .select-list {
+  background: #0f2450;
+  border: var(--edge);
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgb(0 0 0 / 0.45);
+}
+
+:root[data-design='3'] .button {
+  color: #06260f;
+  border-radius: 99px;
+}
+
+:root[data-design='3'] .button:hover {
+  background: #8ee6b4;
+}
+
+:root[data-design='3'] .header .button-quiet,
+:root[data-design='3'] .side .button-quiet {
+  color: var(--ink);
+  background: rgb(9 24 58 / 0.6);
+  border: 1px solid rgb(255 255 255 / 0.4);
+}
+
+:root[data-design='3'] .header .button-quiet:hover,
+:root[data-design='3'] .side .button-quiet:hover {
+  background: rgb(255 255 255 / 0.12);
+}
+
+:root[data-design='3'] .segmented label span {
+  color: var(--ink);
+  background: rgb(9 24 58 / 0.6);
+  border-color: rgb(255 255 255 / 0.4);
+}
+
+:root[data-design='3'] .segmented label:first-of-type span {
+  border-radius: 99px 0 0 99px;
+}
+
+:root[data-design='3'] .segmented label:last-of-type span {
+  border-radius: 0 99px 99px 0;
+}
+
+:root[data-design='3'] .segmented input:checked + span {
+  color: #06260f;
+  background: var(--green);
+}
+
+/* Light around the globe */
+
+:root[data-design='3'] .globe::before {
+  content: '';
+  position: absolute;
+  left: var(--globe-x, 50%);
+  top: var(--globe-y, 50%);
+  width: calc(2.5 * var(--globe-r, 0px));
+  height: calc(2.5 * var(--globe-r, 0px));
+  background: radial-gradient(
+    closest-side,
+    rgb(126 170 255 / 0.55) 79%,
+    rgb(126 170 255 / 0.22) 84%,
+    rgb(126 170 255 / 0.07) 92%,
+    transparent 100%
+  );
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+:root[data-design='3'] .globe .maplibregl-map {
+  z-index: 1;
+}
+
+:root[data-design='3'] .tooltip {
+  color: #ffffff;
+  background: #071430;
+  border: 1px solid rgb(255 255 255 / 0.5);
+}
+
+:root[data-design='3'] .swatch-hatch {
+  background: repeating-linear-gradient(135deg, #071430 0 2px, #8fb6ff 2px 5px);
+}
+
+:root[data-design='3'] .key-preview {
+  bottom: 52px;
+  z-index: 2;
+  text-shadow: 0 1px 6px rgb(7 20 48 / 0.9);
+}
+
+:root[data-design='3'] .footer {
+  margin: 0;
+  padding: 8px var(--gutter) 10px;
+  font-size: 0.78rem;
+  color: #c5d3f0;
+  border-top: 1px solid rgb(255 255 255 / 0.2);
+}
+
+:root[data-design='3'] .footer a,
+:root[data-design='3'] .footer .link {
+  color: #ffffff;
+}
+
+:root[data-design='3'] .dialog {
+  background: #0f2450;
+}
+
+/* The dock */
+
+:root[data-design='3'] .dock {
+  display: grid;
+  gap: 8px;
+}
+
+:root[data-design='3'] .dock-bar,
+:root[data-design='3'] .sheet {
+  color: var(--ink);
+  background: rgb(11 27 62 / 0.97);
+  border: var(--edge);
+  border-radius: var(--radius);
+}
+
+:root[data-design='3'] .dock-bar {
+  display: grid;
+  gap: 8px;
+  padding: 12px 16px;
+}
+
+:root[data-design='3'] .dock-top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px 20px;
+}
+
+:root[data-design='3'] .summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 14px;
+}
+
+:root[data-design='3'] .summary h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+:root[data-design='3'] .summary p {
+  font-size: 0.9375rem;
+  color: var(--ink-soft);
+}
+
+:root[data-design='3'] .summary .figure {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--green);
+}
+
+:root[data-design='3'] .dock-toggle {
+  padding: 6px 14px;
+  font-size: 0.9375rem;
+}
+
+:root[data-design='3'] .share-bar {
+  height: 8px;
+}
+
+:root[data-design='3'] .share-bar span {
+  border-radius: 99px;
+}
+
+:root[data-design='3'] .legend {
+  position: static;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  font-size: 0.875rem;
+  background: none;
+  border: 0;
+  transform: none;
+}
+
+:root[data-design='3'] .legend-item,
+:root[data-design='3'] .legend-note {
+  display: flex;
+  gap: 6px;
+  width: auto;
+  padding: 4px 10px 4px 7px;
+  white-space: nowrap;
+}
+
+:root[data-design='3'] .legend-item {
+  border: 1px solid rgb(255 255 255 / 0.3);
+  border-radius: 99px;
+}
+
+:root[data-design='3'] .legend-item:hover {
+  background: rgb(255 255 255 / 0.1);
+  border-color: rgb(255 255 255 / 0.6);
+}
+
+:root[data-design='3'] .legend-item[aria-pressed='true'] {
+  color: #06260f;
+  background: var(--green);
+  border-color: var(--green);
+}
+
+:root[data-design='3'] .legend-item .swatch,
+:root[data-design='3'] .legend-note .swatch {
+  border-radius: 50%;
+}
+
+:root[data-design='3'] .legend-note {
+  padding-right: 2px;
+  font-size: var(--step--1);
+}
+
+:root[data-design='3'] .list-tools {
+  background: #0d2049;
+  border-bottom: 1px solid var(--line);
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+:root[data-design='3'] .search {
+  flex: 0 1 360px;
+}
+
+:root[data-design='3'] .group {
+  padding: 0 18px 6px;
+}
+
+:root[data-design='3'] .group h3 {
+  padding: 16px 0 6px;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+}
+
+:root[data-design='3'] .group h3 .swatch {
+  border-radius: 50%;
+}
+
+:root[data-design='3'] .group ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  column-gap: 28px;
+}
+
+:root[data-design='3'] .row {
+  height: 100%;
+  padding: 7px 0;
+  border-top: 0;
+  border-bottom: var(--edge-soft);
+}
+
+:root[data-design='3'] .row:hover {
+  background: none;
+  border-bottom-color: var(--green);
+}
+
+:root[data-design='3'] .flag {
+  border-color: rgb(246 220 147 / 0.5);
+}
+
+:root[data-design='3'] .claims {
+  border-color: rgb(246 220 147 / 0.5);
+}
+
+:root[data-design='3'] .requirement {
+  background: rgb(255 255 255 / 0.04);
+  border-color: rgb(255 255 255 / 0.22);
+}
+
+:root[data-design='3'] .sheet .panel {
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+  gap: 12px 16px;
+  padding: 16px 18px;
+}
+
+:root[data-design='3'] .sheet .panel > :not(.requirement) {
+  grid-column: 1 / -1;
+}
+
+:root[data-design='3'] .sheet .panel h2 {
+  font-size: 1.6rem;
+}
+
+/* Wide screens: the globe is the page, everything else lies over it */
+
+@media (min-width: 821px) {
+  :root[data-design='3'] .app {
+    position: relative;
+    display: block;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  :root[data-design='3'] .stage {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  :root[data-design='3'] .header {
+    position: absolute;
+    inset: 0 0 auto 0;
+    z-index: 4;
+    pointer-events: none;
+  }
+
+  :root[data-design='3'] .header > * {
+    pointer-events: auto;
+  }
+
+  :root[data-design='3'] .is-empty .header {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 18px;
+    padding-top: 16px;
+  }
+
+  :root[data-design='3'] .is-empty .header h1 {
+    justify-self: start;
+  }
+
+  :root[data-design='3'] .is-empty .intro {
+    margin-top: 1vh;
+  }
+
+  /* Start screen: only the top of a very large globe rises into view. */
+  :root[data-design='3'] .is-empty .globe {
+    inset: 0 0 -75% 0;
+  }
+
+  :root[data-design='3'] .footer {
+    position: absolute;
+    inset: auto 0 0 0;
+    z-index: 3;
+    background: rgb(10 26 60 / 0.72);
+  }
+
+  :root[data-design='3'] .dock {
+    position: absolute;
+    left: 50%;
+    bottom: 46px;
+    z-index: 2;
+    width: min(1240px, calc(100% - 2 * var(--gutter)));
+    transform: translateX(-50%);
+  }
+
+  :root[data-design='3'] .sheet {
+    position: absolute;
+    inset: auto 0 calc(100% + 8px) 0;
+    width: auto;
+    max-height: min(42vh, 420px);
+    overflow-y: auto;
+  }
+
+  /* A country opens as one wide band: its name on the left, the answer beside it. */
+  :root[data-design='3'] .sheet .panel {
+    grid-template-columns: 230px minmax(0, 1fr) minmax(0, 1fr);
+    grid-auto-flow: row dense;
+    align-items: start;
+  }
+
+  :root[data-design='3'] .sheet .panel > :not(.requirement) {
+    grid-column: 1;
+  }
+
+  :root[data-design='3'] .sheet .panel {
+    row-gap: 8px;
+  }
+
+  :root[data-design='3'] .sheet .panel > .requirement {
+    grid-row: 1 / span 4;
+  }
+
+  /* The key on the start screen lies on the globe, so it gets a darker ground. */
+  :root[data-design='3'] .is-empty .globe-area::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 210px;
+    background: linear-gradient(transparent, rgb(7 20 48 / 0.88) 62%);
+    pointer-events: none;
+  }
+
+  :root[data-design='3'] .sheet .panel > .requirement:only-of-type {
+    grid-column: 2 / -1;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    grid-auto-flow: row dense;
+    column-gap: 28px;
+  }
+
+  :root[data-design='3'] .sheet .requirement:only-of-type > * {
+    grid-column: 1;
+  }
+
+  :root[data-design='3'] .sheet .requirement:only-of-type > :is(dl, .claims, .links) {
+    grid-column: 2;
+  }
+
+  :root[data-design='3'] .sheet .requirement:only-of-type > dl {
+    grid-row: 1 / span 3;
+  }
+}
+
+@media (max-width: 820px) {
+  :root[data-design='3'] body {
+    background: linear-gradient(#173a7c, #0a1a3c 70%);
+  }
+
+  :root[data-design='3'] .sheet.has-detail {
+    order: -2;
+  }
+
+  :root[data-design='3'] .dock-toggle {
+    display: none;
+  }
+
+  :root[data-design='3'] .dock {
+    grid-template-rows: auto auto;
+  }
+
+  :root[data-design='3'] .dock-bar {
+    order: -1;
+    padding: 14px;
+  }
+
+  :root[data-design='3'] .group {
+    padding: 0 14px 6px;
+  }
+
+  :root[data-design='3'] .search {
+    flex: 1;
+  }
+}
