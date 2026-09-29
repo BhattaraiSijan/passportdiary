@@ -74,7 +74,7 @@ export function PassportSelect({ label, countries, value, exclude, onChange }: P
         aria-activedescendant={open && options[active] ? `${id}-option-${active}` : undefined}
         autoComplete="off"
         spellCheck={false}
-        placeholder={current ? current.name : 'Choose a country'}
+        placeholder={open && current ? current.name : label}
         value={open ? query : (current?.name ?? '')}
         onChange={(e) => {
           setQuery(e.target.value);

@@ -33,6 +33,12 @@ test('shows the data date and attribution on every view', async ({ page }) => {
   await expect(page.getByRole('dialog')).toContainText('Natural Earth');
 });
 
+test('keeps the side panel away until a passport is chosen', async ({ page }) => {
+  await expect(page.locator('.side')).toHaveCount(0);
+  await choose(page, 'Your passport', 'nepal');
+  await expect(page.locator('.side')).toBeVisible();
+});
+
 test('shows entry rules for a Nepali passport', async ({ page }) => {
   await choose(page, 'Your passport', 'nepal');
 
@@ -93,7 +99,9 @@ test('remembers the passport on the next visit', async ({ page }) => {
   await expect(page.locator('.legend')).toBeVisible();
 });
 
-test('draws the globe and opens a country from it', async ({ page }) => {
+test('draws the globe and opens a country from it', async ({ page, isMobile }) => {
+  // On a wide screen the globe is centred on the page, between legend and side panel.
+  if (!isMobile) await page.setViewportSize({ width: 1920, height: 1000 });
   await choose(page, 'Your passport', 'nepal');
   const canvas = page.locator('.globe canvas');
   await expect(canvas).toBeVisible();

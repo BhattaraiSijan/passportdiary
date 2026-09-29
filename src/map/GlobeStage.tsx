@@ -29,7 +29,7 @@ class GlobeBoundary extends Component<{ children: ReactNode }, { failed: boolean
 
 const webgl2 = supportsWebGL2();
 
-export function GlobeStage({ view }: { view: View | null }) {
+export function GlobeStage({ view, sideOpen }: { view: View | null; sideOpen: boolean }) {
   if (!webgl2) {
     return (
       <p className="globe-message" role="status">
@@ -40,7 +40,7 @@ export function GlobeStage({ view }: { view: View | null }) {
   return (
     <GlobeBoundary>
       <Suspense fallback={<p className="globe-message">Loading the globe…</p>}>
-        <Globe view={view} />
+        <Globe view={view} sideOpen={sideOpen} />
       </Suspense>
     </GlobeBoundary>
   );

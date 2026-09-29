@@ -53,7 +53,7 @@ export function App() {
     <div className="app">
       <header className="header">
         <h1>PassportDiary</h1>
-        <div className="controls">
+        <div className={comparing ? 'controls' : 'controls controls-single'}>
           <PassportSelect
             label="Your passport"
             countries={base.countries}
@@ -67,7 +67,7 @@ export function App() {
 
       <main className={showSide ? 'stage has-side' : 'stage'}>
         <div className="globe-area">
-          <GlobeStage view={view} />
+          <GlobeStage view={view} sideOpen={showSide} />
           {view && <Legend view={view} />}
           {!showSide && (
             <div className="intro">

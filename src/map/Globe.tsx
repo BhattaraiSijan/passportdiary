@@ -11,6 +11,7 @@ import {
   type StyleSpecification,
 } from '@vis.gl/react-maplibre';
 import type { FeatureCollection } from 'geojson';
+import type { PaddingOptions } from 'maplibre-gl';
 import { CATEGORY_LABELS } from '../data/labels.ts';
 import { useStore } from '../state/store.ts';
 import type { View } from '../state/useView.ts';
@@ -28,11 +29,35 @@ const STYLE: StyleSpecification = {
 
 const INTERACTIVE = ['markers', 'countries'];
 const HATCH = 'hatch';
+const OVERLAY_GAP = 16;
 
 // Zoom at which the whole globe fits the container, so phones are not cropped.
-function fitZoom(width: number, height: number): number {
-  const diameter = Math.min(width, height) * 0.92;
-  return Math.max(0.6, Math.log2((diameter * Math.PI) / 512));
+function fitZoom(diameter: number): number {
+  return Math.max(0.6, Math.log2((diameter * 0.97 * Math.PI) / 512));
+}
+
+// Where the globe sits. It stays centred on the page whenever the space beside the
+// side panel allows a large globe; on narrower screens it moves into the free area.
+function frame(map: MapRef): { zoom: number; padding: PaddingOptions } {
+  const container = map.getContainer();
+  const { clientWidth: width, clientHeight: height } = container;
+  const box = container.getBoundingClientRect();
+  // Panels lie over the edges of the map on wide screens only.
+  const overlays = [...(container.closest('.stage')?.querySelectorAll<HTMLElement>('.legend, .intro, .side') ?? [])]
+    .filter((el) => getComputedStyle(el).position === 'absolute')
+    .map((el) => ({ el, rect: el.getBoundingClientRect() }));
+  let left = 0;
+  let right = 0;
+  for (const { el, rect } of overlays) {
+    if (el.classList.contains('side')) right = Math.max(right, box.right - rect.left + OVERLAY_GAP);
+    else left = Math.max(left, rect.right - box.left + OVERLAY_GAP);
+  }
+  const centred = width - 2 * Math.max(left, right);
+  if (centred >= height * 0.85) {
+    return { zoom: fitZoom(Math.min(height, centred)), padding: { top: 0, bottom: 0, left: 0, right: 0 } };
+  }
+  const free = Math.max(width - left - right, 240);
+  return { zoom: fitZoom(Math.min(height, free)), padding: { top: 0, bottom: 0, left, right } };
 }
 
 // Diagonal stripes drawn over places where the sources disagree.
@@ -57,7 +82,7 @@ interface Hover {
   y: number;
 }
 
-export default function Globe({ view }: { view: View | null }) {
+export default function Globe({ view, sideOpen }: { view: View | null; sideOpen: boolean }) {
   const base = useStore((s) => s.base)!;
   const selected = useStore((s) => s.selected);
   const select = useStore((s) => s.select);
@@ -65,6 +90,7 @@ export default function Globe({ view }: { view: View | null }) {
   const compareMode = useStore((s) => s.compareMode);
   const passportA = useStore((s) => s.passportA);
 
+  const hasView = view !== null;
   const mapRef = useRef<MapRef>(null);
   const [loaded, setLoaded] = useState(false);
   const [contextLost, setContextLost] = useState(false);
@@ -106,14 +132,25 @@ export default function Globe({ view }: { view: View | null }) {
     };
   }, [view, filter, showDifference]);
 
-  const moveTo = useCallback((center: [number, number], minZoom?: number) => {
-    const map = mapRef.current;
-    if (!map) return;
-    const { clientWidth, clientHeight } = map.getContainer();
-    const zoom = Math.max(map.getZoom(), minZoom ?? fitZoom(clientWidth, clientHeight));
-    if (reducedMotion()) map.jumpTo({ center, zoom });
-    else map.easeTo({ center, zoom, duration: 900 });
-  }, []);
+  const moveTo = useCallback(
+    (center: [number, number] | undefined, minZoom?: number) => {
+      const map = mapRef.current;
+      if (!map) return;
+      const { zoom: fit, padding } = frame(map);
+      const zoom = Math.max(map.getZoom(), minZoom ?? fit);
+      const target = { ...(center ? { center } : {}), zoom, padding };
+      if (reducedMotion()) map.jumpTo(target);
+      else map.easeTo({ ...target, duration: 900 });
+    },
+    // The panels that frame() measures come and go with these two.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [sideOpen, hasView],
+  );
+
+  // Re-frame when a panel appears or disappears.
+  useEffect(() => {
+    if (loaded) moveTo(undefined);
+  }, [loaded, moveTo]);
 
   useEffect(() => {
     const country = passportA ? base.byId.get(passportA) : undefined;
@@ -144,13 +181,17 @@ export default function Globe({ view }: { view: View | null }) {
   const onLoad = useCallback(() => {
     const map = mapRef.current?.getMap();
     if (!map) return;
+    if (import.meta.env.DEV) (window as unknown as { __map: unknown }).__map = map;
     if (!map.hasImage(HATCH)) map.addImage(HATCH, hatchImage());
-    const { clientWidth, clientHeight } = map.getContainer();
-    map.jumpTo({ zoom: fitZoom(clientWidth, clientHeight) });
+    map.jumpTo(frame(mapRef.current!));
     const canvas = map.getCanvas();
     canvas.addEventListener('webglcontextlost', () => setContextLost(true));
     canvas.addEventListener('webglcontextrestored', () => setContextLost(false));
     setLoaded(true);
+  }, []);
+
+  const onResize = useCallback(() => {
+    if (mapRef.current) mapRef.current.jumpTo(frame(mapRef.current));
   }, []);
 
   const onMouseMove = useCallback((e: MapLayerMouseEvent) => {
@@ -189,6 +230,7 @@ export default function Globe({ view }: { view: View | null }) {
         interactiveLayerIds={loaded ? INTERACTIVE : []}
         cursor={hover ? 'pointer' : 'grab'}
         onLoad={onLoad}
+        onResize={onResize}
         onMouseMove={onMouseMove}
         onMouseLeave={() => setHover(null)}
         onClick={onClick}

@@ -20,6 +20,9 @@
   --edge-soft: 1px solid var(--line);
   --edge-on-blue: 1px solid rgb(255 255 255 / 0.55);
 
+  --side-width: 400px;
+  --gutter: 20px;
+
   --radius: 10px;
   --step--1: 0.833rem;
   --step-0: 1rem;
@@ -97,12 +100,14 @@ input {
   height: 100%;
 }
 
+/* Name on the left, controls in the middle, and an equal empty column on the
+   right so the controls sit on the page's centre line, above the globe. */
 .header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: end;
-  gap: 12px 28px;
-  padding: 14px 20px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px 20px;
+  padding: 12px var(--gutter);
   color: var(--paper);
 }
 
@@ -110,36 +115,45 @@ input {
   font-size: var(--step-2);
   font-weight: 750;
   letter-spacing: -0.02em;
-  line-height: 1.1;
-  padding-bottom: 8px;
+  line-height: 1;
+}
+
+/* With one passport the field itself sits on the centre line and the button hangs to its right. */
+.controls-single {
+  position: relative;
+}
+
+.controls-single > .button {
+  position: absolute;
+  top: 0;
+  left: calc(100% + 8px);
+  white-space: nowrap;
 }
 
 .controls {
   display: flex;
   flex-wrap: wrap;
-  align-items: end;
-  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
 }
 
+/* The globe spans the whole stage; legend and side panel sit over its edges. */
 .stage {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 16px;
-  min-height: 0;
-  padding: 0 20px;
-}
-
-.stage.has-side {
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
-}
-
-.globe-area {
   position: relative;
   min-height: 0;
 }
 
+.globe-area {
+  position: absolute;
+  inset: 0;
+}
+
 .side {
-  min-height: 0;
+  position: absolute;
+  inset: 0 var(--gutter) 0 auto;
+  z-index: 1;
+  width: var(--side-width);
   overflow-y: auto;
   background: var(--paper);
   border: var(--edge);
@@ -148,7 +162,8 @@ input {
 
 .footer {
   margin-top: 12px;
-  padding: 10px 20px 12px;
+  padding: 10px var(--gutter) 12px;
+  text-align: center;
   border-top: var(--edge-on-blue);
   font-size: var(--step--1);
   color: #d6e2f7;
@@ -206,8 +221,9 @@ input {
 
 .legend {
   position: absolute;
-  left: 0;
-  bottom: 8px;
+  left: var(--gutter);
+  top: 50%;
+  transform: translateY(-50%);
   z-index: 1;
   display: grid;
   gap: 2px;
@@ -277,14 +293,29 @@ input {
 .select {
   position: relative;
   display: grid;
-  gap: 4px;
-  width: 250px;
+  width: 220px;
 }
 
+/* The placeholder names each field, so the labels are for screen readers only. */
 .select label,
 .segmented legend {
-  font-size: var(--step--1);
-  color: #d6e2f7;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.header .select input,
+.header .button,
+.header .segmented label span {
+  padding: 6px 11px;
+  font-size: 0.9375rem;
+}
+
+.header .button {
+  font-weight: 550;
 }
 
 .select input,
@@ -387,10 +418,6 @@ input {
   margin: 0;
   padding: 0;
   border: 0;
-}
-
-.segmented legend {
-  padding: 0 0 4px;
 }
 
 .segmented label span {
@@ -526,8 +553,9 @@ input {
 
 .intro {
   position: absolute;
-  top: 8px;
-  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  left: var(--gutter);
   z-index: 1;
   display: grid;
   gap: 10px;
@@ -656,35 +684,50 @@ input {
 /* Small screens: globe on top, list below */
 
 @media (max-width: 820px) {
+  :root {
+    --gutter: 14px;
+  }
+
   .app {
     height: auto;
     min-height: 100%;
   }
 
-  .header,
-  .footer {
-    padding-inline: 14px;
+  .header {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
   }
 
   .select {
     width: min(100%, 320px);
   }
 
-  .stage,
-  .stage.has-side {
-    grid-template-columns: minmax(0, 1fr);
-    padding: 0 14px;
+  .controls-single > .button {
+    position: static;
+  }
+
+  .stage {
+    display: grid;
+    gap: 12px;
+    padding: 0 var(--gutter);
+  }
+
+  .globe-area {
+    position: static;
+    display: grid;
+    gap: 10px;
   }
 
   .intro {
     position: static;
     order: -1;
     max-width: none;
+    text-align: center;
+    transform: none;
   }
 
-  .globe-area {
-    display: grid;
-    gap: 10px;
+  .intro p {
+    max-width: none;
   }
 
   .globe,
@@ -698,9 +741,12 @@ input {
   .legend {
     position: static;
     grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    transform: none;
   }
 
   .side {
+    position: static;
+    width: auto;
     overflow: visible;
   }
 }
