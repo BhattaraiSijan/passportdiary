@@ -1,0 +1,17 @@
+{
+  "attribution": "Visa data: visa-matrix (github.com/xpressmike/visa-matrix) and Wikipedia contributors, CC BY-SA 4.0. Modified: normalised by PassportDiary.",
+  "cellCount": 39402,
+  "dataAsOf": "2026-07-20",
+  "datasetVersion": "2026-07-20.0",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "overrideCount": 0,
+  "passportCount": 199,
+  "schemaVersion": 1,
+  "upstream": {
+    "commit": "33cf6adec69e108496e72039dc6b29e13f2f3962",
+    "name": "visa-matrix",
+    "sha256": "7a912283fd41a6cdd574d609c5f9012f8ab67a037cc11980a492d912fa20fd4d",
+    "url": "https://github.com/xpressmike/visa-matrix"
+  }
+}
