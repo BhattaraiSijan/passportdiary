@@ -1,0 +1,6 @@
+{
+  "SOL": { "id": "SOL", "name": "Somaliland", "kind": "disputed_area", "parent": "SO" },
+  "CYN": { "id": "CYN", "name": "Northern Cyprus", "kind": "disputed_area", "parent": "CY" },
+  "KAS": { "id": "KAS", "name": "Siachen Glacier", "kind": "disputed_area" },
+  "ATC": { "id": "ATC", "name": "Ashmore and Cartier Islands", "kind": "territory", "parent": "AU" }
+}
