@@ -12,6 +12,8 @@ test('start screen leads to the passport field and nothing is in the way', async
   // No tour, no popup: nothing has to be closed first, and no page is empty.
   await expect(page.locator('dialog[open]')).toHaveCount(0);
   await expect(page.locator('.side, .brief, .hint')).toHaveCount(0);
+  // The field is the only way in: no shortcut passports.
+  await expect(page.locator('.examples, .example')).toHaveCount(0);
   // The field is on the centre line of the page.
   const box = (await page.getByRole('combobox', { name: 'Your passport' }).boundingBox())!;
   const width = page.viewportSize()!.width;
@@ -27,15 +29,8 @@ test('keeps the pages away until a passport is chosen', async ({ page }) => {
   await expect(startHeading(page)).toHaveCount(0);
 });
 
-test('an example passport starts the visit', async ({ page }) => {
-  await page.getByRole('button', { name: 'Try Nepal' }).click();
-  await expect(page.getByRole('combobox', { name: 'Your passport' })).toHaveValue('Nepal');
-  await expect(legendCount(page, 'Visa-free')).toHaveText('11');
-  await expect(startHeading(page)).toHaveCount(0);
-});
-
 test('a returning visitor goes straight to the globe', async ({ page }) => {
-  await page.getByRole('button', { name: 'Try Nepal' }).click();
+  await choose(page, 'Your passport', 'nepal');
   await expect(page.locator('.legend')).toBeVisible();
   await page.reload();
   await expect(page.locator('.legend')).toBeVisible();
@@ -74,7 +69,6 @@ test('forgets the design choice of the earlier version', async ({ page }) => {
   await page.evaluate(() => localStorage.setItem('passportdiary.design', '2'));
   await page.goto('/?design=2');
   await expect(startHeading(page)).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Try Nepal' })).toBeVisible();
   expect(await page.evaluate(() => localStorage.getItem('passportdiary.design'))).toBeNull();
   await expect(page.locator('.switcher')).toHaveCount(0);
 });
@@ -101,7 +95,7 @@ test('the name leads back to the start screen', async ({ page }) => {
   await expect(page.locator('.side, .brief')).toHaveCount(0);
 
   // Starting over does not bring back the tips, nor the comparison or the filter.
-  await page.getByRole('button', { name: 'Try Nepal' }).click();
+  await choose(page, 'Your passport', 'nepal');
   await expect(page.locator('.list .row')).toHaveCount(199);
   await expect(page.locator('.hint')).toHaveCount(0);
   await expect(page.getByRole('combobox', { name: 'Second passport' })).toHaveCount(0);

@@ -5,7 +5,7 @@ import { CountryPanel } from './features/detail/CountryPanel.tsx';
 import { Hint } from './features/hints/Hint.tsx';
 import { DestinationList } from './features/list/DestinationList.tsx';
 import { PassportSelect } from './features/selector/PassportSelect.tsx';
-import { Examples, Intro, KeyPreview } from './features/start/Start.tsx';
+import { Intro, KeyPreview } from './features/start/Start.tsx';
 import { Summary } from './features/summary/Summary.tsx';
 import { GlobeStage } from './map/GlobeStage.tsx';
 import { Legend } from './map/Legend.tsx';
@@ -85,7 +85,6 @@ export function App() {
           />
           <CompareControls />
         </div>
-        {!started && <Examples />}
       </header>
 
       <main className="stage">
