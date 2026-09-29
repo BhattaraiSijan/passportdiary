@@ -29,8 +29,9 @@
 
 .summary h2 {
   font-family: var(--font-display);
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 700;
+  letter-spacing: -0.02em;
   line-height: 1.15;
 }
 
@@ -43,8 +44,9 @@
   display: block;
   font-family: var(--font-display);
   font-size: 2.7rem;
-  font-weight: 650;
+  font-weight: 750;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
   line-height: 1;
   color: var(--blue);
 }
@@ -210,8 +212,9 @@
   gap: 8px;
   padding: 16px 16px 6px;
   font-family: var(--font-display);
-  font-size: 1.05rem;
-  font-weight: 650;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .group h3 .count {
@@ -238,6 +241,7 @@
 
 .row-detail {
   display: grid;
+  font-variant-numeric: tabular-nums;
   font-size: var(--step--1);
   color: var(--ink-soft);
   text-align: right;
@@ -307,8 +311,9 @@
   gap: 10px;
   padding: 6px 14px 6px 10px;
   font-family: var(--font-display);
-  font-size: 1.3rem;
-  font-weight: 700;
+  font-size: 1.2rem;
+  font-weight: 750;
+  letter-spacing: -0.015em;
   line-height: 1.2;
   color: var(--stamp);
   border: 1.5px solid var(--stamp);

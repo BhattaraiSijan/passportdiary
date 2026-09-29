@@ -101,7 +101,9 @@
 
 @media (max-width: 820px) {
   .is-empty .globe {
-    height: max(340px, 100vh - 470px);
+    flex: 1 0 auto;
+    height: auto;
+    min-height: 340px;
   }
 }
 
