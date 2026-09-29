@@ -63,7 +63,7 @@ const visaPage: MapTheme = {
     unknown: '#e3e0d8',
   },
   differences: { a_better: '#2c5cb0', b_better: '#35a36b', same: '#c3cfe3' },
-  ocean: '#dbe6f6',
+  ocean: '#d3e0f4',
   noData: '#e3e0d8',
   border: '#10264d',
   borderOpacity: 0.5,

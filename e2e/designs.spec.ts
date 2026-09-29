@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
-// The design directions under ?design=1..3. The default design is covered by app.spec.ts.
+// The design directions under ?design=1..3. Direction 1 is the default.
+// The first design (?design=0) is covered by app.spec.ts.
 
 async function choose(page: Page, label: string, text: string) {
   const box = page.getByRole('combobox', { name: label });
@@ -101,13 +102,44 @@ test('key and list share one surface in designs 2 and 3', async ({ page, isMobil
   await expect(page.locator('.dock .list .row')).toHaveCount(199);
 });
 
+test('the plain address shows direction 1, and ?design=0 the first design', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('data-design', '1');
+  await expect(page.getByRole('button', { name: 'Try Nepal' })).toBeVisible();
+  await expect(page.locator('.side, .brief')).toHaveCount(0);
+
+  await page.goto('/?design=0');
+  await expect(page.locator('html')).not.toHaveAttribute('data-design');
+  await expect(page.getByRole('button', { name: 'Try Nepal' })).toHaveCount(0);
+});
+
+test('direction 1 keeps key and list on two facing pages', async ({ page, isMobile }) => {
+  if (!isMobile) await page.setViewportSize({ width: 1360, height: 820 });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Try Nepal' }).click();
+  const brief = page.locator('.brief');
+  const side = page.locator('.side');
+  await expect(brief.locator('.legend')).toBeVisible();
+  await expect(side.locator('.list .row')).toHaveCount(199);
+  if (isMobile) return;
+  const left = (await brief.boundingBox())!;
+  const right = (await side.boundingBox())!;
+  expect(Math.abs(left.width - right.width)).toBeLessThan(1);
+  expect(Math.abs(left.y - right.y)).toBeLessThan(1);
+  expect(Math.abs(left.height - right.height)).toBeLessThan(1);
+  // Equal margins, so the globe between them is on the centre line of the page.
+  expect(Math.abs(left.x - (1360 - right.x - right.width))).toBeLessThan(1);
+});
+
 test('the switcher changes design and the choice is remembered', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('html')).not.toHaveAttribute('data-design');
+  await expect(page.locator('html')).toHaveAttribute('data-design', '1');
   await page.getByRole('button', { name: 'Design: Departures' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-design', '2');
   await page.goto('/');
   await expect(page.locator('html')).toHaveAttribute('data-design', '2');
   await page.getByRole('button', { name: 'Design: Current' }).click();
+  await expect(page.locator('html')).not.toHaveAttribute('data-design');
+  await page.goto('/');
   await expect(page.locator('html')).not.toHaveAttribute('data-design');
 });

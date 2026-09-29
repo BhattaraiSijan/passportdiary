@@ -16,7 +16,8 @@ test.beforeEach(async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
-  await page.goto('/');
+  // These tests cover the first design, which is kept under ?design=0.
+  await page.goto('/?design=0');
   await expect(page.getByRole('heading', { name: 'Where can your passport take you?' })).toBeVisible();
   pageErrors.set(page, errors);
 });

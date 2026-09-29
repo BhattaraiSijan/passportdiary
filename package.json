@@ -14,7 +14,8 @@
     "data:validate": "tsx scripts/validate.ts",
     "data:build": "npm run data:import && npm run data:shapes && npm run data:validate",
     "check": "npm run typecheck && npm run lint && npm run test && npm run data:validate",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "design:screens": "node scripts/design-screens.mjs"
   },
   "private": true,
   "type": "module",

@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react';
 
-// 0 is the design the app shipped with. 1 to 3 are the directions being explored.
+// 0 is the design the app first shipped with. 1 is the chosen direction and the
+// default. 2 and 3 are the other directions that were explored.
 export type Design = 0 | 1 | 2 | 3;
 
 export const DESIGNS: { id: Design; name: string }[] = [
@@ -9,6 +10,8 @@ export const DESIGNS: { id: Design; name: string }[] = [
   { id: 2, name: 'Departures' },
   { id: 3, name: 'Night flight' },
 ];
+
+export const DEFAULT: Design = 1;
 
 const STORAGE_KEY = 'passportdiary.design';
 const PARAM = 'design';
@@ -26,13 +29,12 @@ function read(): Design {
     // Storage can be unavailable; the URL still works.
   }
   const fromUrl = parse(new URLSearchParams(window.location.search).get(PARAM));
-  return fromUrl ?? parse(stored) ?? 0;
+  return fromUrl ?? parse(stored) ?? DEFAULT;
 }
 
 function remember(design: Design): void {
   try {
-    if (design === 0) localStorage.removeItem(STORAGE_KEY);
-    else localStorage.setItem(STORAGE_KEY, String(design));
+    localStorage.setItem(STORAGE_KEY, String(design));
   } catch {
     // The choice then lasts for this visit only.
   }
@@ -44,12 +46,12 @@ function apply(design: Design): void {
   else root.dataset.design = String(design);
 }
 
-let current: Design = 0;
+let current: Design = DEFAULT;
 const listeners = new Set<() => void>();
 
 export function initDesign(): void {
   current = read();
-  if (current !== 0) remember(current);
+  if (new URLSearchParams(window.location.search).has(PARAM)) remember(current);
   apply(current);
 }
 
@@ -59,8 +61,7 @@ export function setDesign(design: Design): void {
   remember(design);
   apply(design);
   const url = new URL(window.location.href);
-  if (design === 0) url.searchParams.delete(PARAM);
-  else url.searchParams.set(PARAM, String(design));
+  url.searchParams.set(PARAM, String(design));
   window.history.replaceState(null, '', url);
   listeners.forEach((listener) => listener());
 }

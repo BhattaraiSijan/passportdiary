@@ -13,32 +13,49 @@
   --green: #6ecb93;
   --green-deep: #2b8454;
   --paper: #ffffff;
-  --bg: #f0f4fa;
+  --bg: #1f4e9c;
+  --ground-glow: #2a5fb5;
+  --ground-edge: #143468;
   --ink: #10264d;
   --ink-soft: #485a7e;
   --line: #ccd7ea;
-  --edge: 1px solid #21509f;
+  --hairline: rgb(255 255 255 / 0.42);
+  --edge: 1px solid #10264d;
   --edge-soft: 1px solid var(--line);
-  --focus: #21509f;
-  --header-ink: #10264d;
-  --header-soft: #485a7e;
-  --stage-ink: #10264d;
-  --stage-soft: #485a7e;
+  --focus: #6ecb93;
+  --header-ink: #ffffff;
+  --header-soft: #dfe8fa;
+  --stage-ink: #ffffff;
+  --stage-soft: #dfe8fa;
   --swatch-edge: rgb(16 38 77 / 0.45);
-  --start-edge: #21509f;
-  --start-ring: rgb(110 203 147 / 0.55);
-  --example-edge: #8fa6cf;
-  --example-hover: #ffffff;
+  --start-edge: #10264d;
+  --start-ring: var(--green);
+  --example-edge: rgb(255 255 255 / 0.65);
+  --example-hover: var(--blue-deep);
   --radius: 14px;
   --page: clamp(300px, 23vw, 400px);
+  --head: 104px;
+  --foot: 46px;
   --font-display: 'Besley Variable', Georgia, serif;
   --font-text: 'Public Sans Variable', system-ui, sans-serif;
 }
 
-/* Fine wavy lines, as on the pages of a passport. */
+/* The ground: the blue of the cover, lighter behind the globe, deeper at the edges. */
 :root[data-design='1'] body {
-  background-color: var(--bg);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='28' viewBox='0 0 160 28'%3E%3Cg fill='none' stroke='%2321509f' stroke-width='.7' stroke-opacity='.11'%3E%3Cpath d='M0 14c20-16 60-16 80 0s60 16 80 0'/%3E%3Cpath d='M0 14c20 16 60 16 80 0s60-16 80 0'/%3E%3C/g%3E%3C/svg%3E");
+  background:
+    radial-gradient(
+        ellipse 75% 85% at 50% 54%,
+        var(--ground-glow) 0%,
+        var(--bg) 46%,
+        var(--ground-edge) 100%
+      )
+      fixed,
+    var(--bg);
+}
+
+/* On white, the focus ring is blue; on the ground it is green. */
+:root[data-design='1'] :is(.brief, .side, .dialog, .select-list) {
+  --focus: #21509f;
 }
 
 :root[data-design='1'] .header {
@@ -53,12 +70,11 @@
   font-size: 1.55rem;
   font-weight: 700;
   letter-spacing: -0.01em;
-  color: var(--blue);
+  color: #ffffff;
 }
 
 :root[data-design='1'] .is-empty .header {
   gap: 18px;
-  padding-top: 22px;
 }
 
 :root[data-design='1'] .intro h2 {
@@ -71,34 +87,39 @@
   border-radius: 8px;
 }
 
-:root[data-design='1'] .header .button-quiet {
-  color: var(--blue);
-  background: var(--paper);
-  border: 1px solid #8fa6cf;
+:root[data-design='1'] .header .button-quiet,
+:root[data-design='1'] .segmented label span {
+  color: #ffffff;
+  background: rgb(16 38 77 / 0.35);
+  border: 1px solid var(--hairline);
 }
 
-:root[data-design='1'] .header .button-quiet:hover {
-  background: var(--blue-wash);
+:root[data-design='1'] .header .button-quiet:hover,
+:root[data-design='1'] .segmented label span:hover {
+  background: rgb(16 38 77 / 0.7);
 }
 
 :root[data-design='1'] .button {
   color: var(--blue-ink);
 }
 
-:root[data-design='1'] .segmented label span {
+:root[data-design='1'] .side .button-quiet {
   color: var(--blue);
-  background: var(--paper);
-  border: 1px solid #8fa6cf;
+  border-color: #8fa6cf;
+}
+
+:root[data-design='1'] .segmented label:last-of-type span {
+  border-left: 0;
 }
 
 :root[data-design='1'] .segmented input:checked + span {
   color: var(--blue-ink);
   background: var(--green);
-  border-color: var(--green-deep);
+  border-color: var(--green);
 }
 
 :root[data-design='1'] .segmented input:focus-visible + span {
-  outline-color: var(--blue);
+  outline-color: #ffffff;
 }
 
 /* The plate: a ruled ring around the globe, as around a printed hemisphere. */
@@ -116,15 +137,16 @@
 :root[data-design='1'] .globe::before {
   width: calc(2 * var(--globe-r, 0px) + 14px);
   height: calc(2 * var(--globe-r, 0px) + 14px);
-  background: var(--paper);
-  border: 1px solid var(--blue);
+  background: var(--blue-ink);
+  border: 1px solid rgb(255 255 255 / 0.85);
+  box-shadow: 0 0 90px 18px rgb(126 170 255 / 0.28);
 }
 
 :root[data-design='1'] .globe::after {
   width: calc(2 * var(--globe-r, 0px) + 40px);
   height: calc(2 * var(--globe-r, 0px) + 40px);
-  background: repeating-conic-gradient(var(--blue) 0 0.35deg, transparent 0.35deg 5deg);
-  opacity: 0.55;
+  background: repeating-conic-gradient(#dfe8fa 0 0.35deg, transparent 0.35deg 5deg);
+  opacity: 0.8;
   mask: radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 7px));
 }
 
@@ -133,64 +155,59 @@
 }
 
 :root[data-design='1'] .tooltip {
+  color: #ffffff;
   background: var(--blue-ink);
   border: 1px solid #ffffff;
 }
 
+:root[data-design='1'] .globe-message {
+  color: #ffffff;
+}
+
+:root[data-design='1'] .globe .globe-message {
+  border-top: 1px solid var(--hairline);
+}
+
 :root[data-design='1'] .footer {
   margin-top: 8px;
-  color: var(--ink-soft);
-  border-top: 1px solid var(--line);
+  color: #dfe8fa;
+  border-top: 1px solid var(--hairline);
 }
 
 :root[data-design='1'] .footer a,
 :root[data-design='1'] .footer .link {
-  color: var(--blue);
-}
-
-/* Start screen: the cover of the passport. Blue cloth, the globe as its emblem. */
-
-:root[data-design='1'] .app {
-  transition: background-color 0.4s ease;
-}
-
-:root[data-design='1'] .app.is-empty {
-  --header-ink: #ffffff;
-  --header-soft: #dfe8fa;
-  --stage-ink: #ffffff;
-  --stage-soft: #dfe8fa;
-  --swatch-edge: rgb(255 255 255 / 0.8);
-  --start-edge: #10264d;
-  --start-ring: var(--green);
-  --example-edge: rgb(255 255 255 / 0.65);
-  --example-hover: var(--blue-deep);
-  --focus: #ffffff;
-  background-color: var(--blue);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='28' viewBox='0 0 160 28'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='.7' stroke-opacity='.1'%3E%3Cpath d='M0 14c20-16 60-16 80 0s60 16 80 0'/%3E%3Cpath d='M0 14c20 16 60 16 80 0s60-16 80 0'/%3E%3C/g%3E%3C/svg%3E");
-}
-
-:root[data-design='1'] .is-empty .header h1 {
   color: #ffffff;
 }
+
+:root[data-design='1'] .notice {
+  color: #ffffff;
+}
+
+/* Start screen: the cover. A very large globe rises from the bottom edge, drawn
+   as the emblem: green on deep blue. */
 
 :root[data-design='1'] .is-empty .globe::before {
   background: transparent;
   border-color: var(--green);
+  box-shadow: 0 0 120px 30px rgb(126 170 255 / 0.3);
 }
 
 :root[data-design='1'] .is-empty .globe::after {
-  background: repeating-conic-gradient(var(--green) 0 0.35deg, transparent 0.35deg 5deg);
+  background: repeating-conic-gradient(var(--green) 0 0.12deg, transparent 0.12deg 2.5deg);
   opacity: 0.9;
 }
 
-:root[data-design='1'] .is-empty .footer {
-  color: #dfe8fa;
-  border-top-color: rgb(255 255 255 / 0.35);
+:root[data-design='1'] .key-preview {
+  bottom: calc(var(--foot) + 12px);
+  z-index: 2;
+  padding: 10px 20px 12px;
+  background: rgb(16 38 77 / 0.86);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
 }
 
-:root[data-design='1'] .is-empty .footer a,
-:root[data-design='1'] .is-empty .footer .link {
-  color: #ffffff;
+:root[data-design='1'] .key-preview .swatch {
+  border-color: rgb(255 255 255 / 0.8);
 }
 
 /* Pages */
@@ -277,6 +294,11 @@
   background: repeating-linear-gradient(135deg, #ffffff 0 2px, var(--blue) 2px 5px);
 }
 
+:root[data-design='1'] .brief .swatch,
+:root[data-design='1'] .side .swatch {
+  border-color: rgb(16 38 77 / 0.45);
+}
+
 :root[data-design='1'] .hint {
   padding-top: 10px;
   border-top: 1px solid var(--line);
@@ -335,14 +357,54 @@
   border-radius: 50%;
 }
 
-/* Wide screens: two facing pages with the globe between them */
+/* Wide screens: the globe is the page. Header, footer and the two facing pages
+   lie over it, so the map never changes size and the globe can glide. */
 
 @media (min-width: 1101px) {
+  :root[data-design='1'] .app {
+    position: relative;
+    display: block;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  :root[data-design='1'] .stage {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  :root[data-design='1'] .header {
+    position: absolute;
+    inset: 0 0 auto 0;
+    z-index: 4;
+    pointer-events: none;
+  }
+
+  :root[data-design='1'] .header > * {
+    pointer-events: auto;
+  }
+
+  :root[data-design='1'] .is-empty .header h1 {
+    justify-self: start;
+  }
+
+  :root[data-design='1'] .footer {
+    position: absolute;
+    inset: auto 0 0 0;
+    z-index: 3;
+    margin: 0;
+  }
+
+  :root[data-design='1'] .is-empty .footer {
+    background: rgb(16 38 77 / 0.8);
+  }
+
   :root[data-design='1'] .brief,
   :root[data-design='1'] .side {
     position: absolute;
-    top: 4px;
-    bottom: 4px;
+    top: var(--head);
+    bottom: calc(var(--foot) + 8px);
     z-index: 2;
     width: var(--page);
     overflow-y: auto;
@@ -353,11 +415,55 @@
   }
 
   :root[data-design='1'] .side {
-    inset: 4px var(--gutter) 4px auto;
+    inset: var(--head) var(--gutter) calc(var(--foot) + 8px) auto;
   }
 
   :root[data-design='1'] .brief .hint {
     margin-top: auto;
+  }
+}
+
+/* Short screens: the left page tightens so that all of it shows without scrolling. */
+@media (min-width: 1101px) and (max-height: 880px) {
+  :root[data-design='1'] {
+    --head: 100px;
+  }
+
+  :root[data-design='1'] .brief {
+    gap: 8px;
+    padding: 14px 16px 10px;
+  }
+
+  :root[data-design='1'] .summary {
+    gap: 2px;
+    padding-bottom: 8px;
+  }
+
+  :root[data-design='1'] .summary h2 {
+    font-size: 1.35rem;
+  }
+
+  :root[data-design='1'] .summary .figure {
+    font-size: 2.1rem;
+  }
+
+  :root[data-design='1'] .summary p,
+  :root[data-design='1'] .legend {
+    font-size: 0.875rem;
+  }
+
+  :root[data-design='1'] .legend-item,
+  :root[data-design='1'] .legend-note {
+    padding: 3px 8px;
+  }
+
+  :root[data-design='1'] .legend-help {
+    font-size: 0.75rem;
+  }
+
+  :root[data-design='1'] .hint {
+    padding-top: 8px;
+    font-size: 0.78rem;
   }
 }
 
@@ -383,6 +489,23 @@
     height: min(70vh, 640px);
   }
 
+  :root[data-design='1'] .is-empty .stage {
+    padding: 0;
+  }
+
+  :root[data-design='1'] .is-empty .globe-area {
+    height: max(360px, 100vh - 420px);
+  }
+
+  :root[data-design='1'] .footer {
+    margin-top: 16px;
+    padding-bottom: 40px;
+  }
+
+  :root[data-design='1'] .is-empty .footer {
+    margin-top: 0;
+  }
+
   :root[data-design='1'] .brief,
   :root[data-design='1'] .side {
     position: static;
@@ -392,9 +515,68 @@
   }
 }
 
+@media (max-width: 1100px) {
+  :root[data-design='1'] body {
+    background: linear-gradient(var(--ground-glow), var(--bg) 35%, var(--ground-edge)) var(--bg);
+  }
+
+  /* The key lies on the foot of the globe, in two columns and without the small print. */
+  :root[data-design='1'] .is-empty .globe-area {
+    position: relative;
+    display: block;
+    overflow: hidden;
+  }
+
+  /* The pages follow the globe in the page, and its glow must not fall on them. */
+  :root[data-design='1'] .brief,
+  :root[data-design='1'] .side {
+    position: relative;
+    inset: auto;
+    z-index: 2;
+  }
+
+  /* The globe's box is clipped here, so the glow would show as a hard edge. */
+  :root[data-design='1'] .is-empty .globe::before {
+    box-shadow: none;
+  }
+
+  :root[data-design='1'] .key-preview {
+    position: absolute;
+    left: 50%;
+    bottom: 10px;
+    width: max-content;
+    max-width: calc(100% - 8px);
+    padding: 10px 16px 12px;
+    transform: translateX(-50%);
+  }
+
+  :root[data-design='1'] .key-preview ul {
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: center;
+    gap: 6px 18px;
+  }
+
+  :root[data-design='1'] .key-preview small {
+    display: none;
+  }
+}
+
 @media (max-width: 820px) {
   :root[data-design='1'] .header h1 {
     font-size: 1.4rem;
+  }
+
+  :root[data-design='1'] .stage {
+    padding-bottom: 4px;
+  }
+
+  :root[data-design='1'] .is-empty .stage {
+    padding: 0;
+  }
+
+  :root[data-design='1'] .is-empty .globe {
+    height: max(340px, 100vh - 470px);
   }
 
   :root[data-design='1'] .globe::after {

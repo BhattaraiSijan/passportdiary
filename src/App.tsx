@@ -246,9 +246,9 @@ export function App() {
       </header>
 
       <main className={empty ? 'stage' : 'stage has-side'}>
-        <div className="globe-area" data-dome={empty && design === 3 ? '' : undefined}>
+        <div className="globe-area" data-dome={empty && design === 3 ? '' : empty && design === 1 ? 'pad' : undefined}>
           <GlobeStage view={view} sideOpen={showSide} reframe={reframe} />
-          {empty && <KeyPreview overGlobe={design === 3} />}
+          {empty && <KeyPreview overGlobe={design === 3 || design === 1} />}
         </div>
         {surfaces}
         {below}

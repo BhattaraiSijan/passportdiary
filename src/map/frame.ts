@@ -79,12 +79,35 @@ export interface Frame {
   zoomAt: (latitude: number) => number;
 }
 
+const DOME_CENTER: [number, number] = [48, 12];
+
+// The start screen of the main design: a very large globe rises from the bottom
+// edge. The map keeps its size, so the globe can glide from here to its place.
+function domeFrame(top: number, width: number, height: number): Frame {
+  const crown = top + 30;
+  const visible = Math.max(height - crown, 120);
+  // The map cannot put its centre below its own bottom edge, so at most half shows.
+  const diameter = Math.min(visible * 2, width * 1.5);
+  const centre = crown + diameter / 2;
+  const padding = { top: Math.max(0, 2 * centre - height), bottom: 0, left: 0, right: 0 };
+  const zoomAt = (lat: number) => zoomForDiameter(diameter, lat, height);
+  return {
+    zoom: zoomAt(DOME_CENTER[1]),
+    padding,
+    shifted: padding,
+    look: 0,
+    zoomAt,
+    center: DOME_CENTER,
+  };
+}
+
 export function designFrame(map: MapLibre, fill: number, latitude = map.getCenter().lat): Frame {
   const container = map.getContainer();
   const { clientWidth: width, clientHeight: height } = container;
   const area = container.closest<HTMLElement>('.globe-area');
   const padding = measure(map, 'data-frame');
   // On the start screen of some designs only the top of a very large globe shows.
+  if (area?.dataset.dome === 'pad') return domeFrame(padding.top, width, height);
   const dome = area?.dataset.dome !== undefined;
   if (dome) padding.bottom = 0;
 
