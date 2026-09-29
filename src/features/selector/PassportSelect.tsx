@@ -35,7 +35,8 @@ export function PassportSelect({
   const inputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [active, setActive] = useState(0);
+  // -1: nothing is highlighted, so Enter cannot pick a country nobody chose.
+  const [active, setActive] = useState(-1);
 
   const current = countries.find((c) => c.id === value);
   const options = useMemo(() => {
@@ -48,6 +49,13 @@ export function PassportSelect({
     );
   }, [countries, query, exclude]);
 
+  // An untouched list highlights the current passport, or nothing at all.
+  const openList = () => {
+    if (open) return;
+    setActive(options.findIndex((c) => c.id === value));
+    setOpen(true);
+  };
+
   const choose = (country: Country | undefined) => {
     if (!country) return;
     onChange(country.id);
@@ -59,16 +67,19 @@ export function PassportSelect({
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       e.preventDefault();
       if (!open) {
-        setOpen(true);
+        openList();
         return;
       }
-      const step = e.key === 'ArrowDown' ? 1 : -1;
-      const next = (active + step + options.length) % Math.max(options.length, 1);
+      if (options.length === 0) return;
+      const next =
+        e.key === 'ArrowDown'
+          ? (active + 1) % options.length
+          : (Math.max(active, 0) - 1 + options.length) % options.length;
       setActive(next);
       document.getElementById(`${id}-option-${next}`)?.scrollIntoView({ block: 'nearest' });
     } else if (e.key === 'Enter' && open) {
       e.preventDefault();
-      choose(options[active]);
+      if (active >= 0) choose(options[active]);
     } else if (e.key === 'Escape') {
       setOpen(false);
       setQuery('');
@@ -92,10 +103,13 @@ export function PassportSelect({
         value={open ? query : (current?.name ?? '')}
         onChange={(e) => {
           setQuery(e.target.value);
-          setActive(0);
+          // Typing highlights the best match; an emptied field highlights nothing.
+          setActive(e.target.value.trim() === '' ? -1 : 0);
           setOpen(true);
         }}
-        onFocus={() => setOpen(true)}
+        onFocus={openList}
+        // The field keeps focus after a choice, so a click has to open the list too.
+        onClick={openList}
         onBlur={() => {
           setOpen(false);
           setQuery('');

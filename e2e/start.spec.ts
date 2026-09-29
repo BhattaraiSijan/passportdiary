@@ -46,6 +46,30 @@ test('a click on the globe before choosing leads to the passport field', async (
   await expect(legendCount(page, 'Visa-free')).toHaveText('11');
 });
 
+test('Enter on an untouched list does not pick a passport', async ({ page }) => {
+  const field = page.getByRole('combobox', { name: 'Your passport' });
+  await field.click();
+  await expect(page.getByRole('listbox', { name: 'Your passport' })).toBeVisible();
+  await page.keyboard.press('Enter');
+  await expect(field).toHaveValue('');
+  await expect(startHeading(page)).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem('passportdiary.selection'))).toBeNull();
+});
+
+test('the passport list opens again on a click after a choice', async ({ page }) => {
+  await choose(page, 'Your passport', 'nepal');
+  const field = page.getByRole('combobox', { name: 'Your passport' });
+  await field.click();
+  await expect(page.getByRole('listbox', { name: 'Your passport' })).toBeVisible();
+  // The current passport is the one highlighted, so Enter keeps it.
+  await page.keyboard.press('Enter');
+  await expect(field).toHaveValue('Nepal');
+  await field.click();
+  await page.getByRole('option', { name: /Japan/ }).click();
+  await expect(field).toHaveValue('Japan');
+  await expect(page.locator('.summary h2')).toContainText('Japan');
+});
+
 test('a returning visitor goes straight to the globe', async ({ page }) => {
   await choose(page, 'Your passport', 'nepal');
   await expect(page.locator('.legend')).toBeVisible();
