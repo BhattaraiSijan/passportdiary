@@ -19,6 +19,10 @@ npm run dev        # http://localhost:5173
 | `npm run test:e2e` | Browser tests against the production build (run `npx playwright install chromium` once) |
 | `npm run build` | Production build in `dist/`, deployable to any static host |
 | `npm run data:build` | Regenerate `public/data/` from `data/raw/` and validate it |
+| `npm run screens` | Take the screenshots in `docs/screens/` (needs `npx vite --port 5183 --strictPort` running) |
+
+The design (colours, typeface, layout, start screen, measured contrast) is described in
+[`docs/DESIGN.md`](docs/DESIGN.md).
 
 ## How the data flows
 
@@ -75,7 +79,8 @@ before committing.
 ## Roadmap
 
 Done: data pipeline, globe, passport selector, destination list with search and filter,
-country detail panel, compare two passports.
+country detail panel, compare two passports, start screen for first-time visitors, tips that
+go away once used, and a way to start over.
 
 Next, in rough order:
 
