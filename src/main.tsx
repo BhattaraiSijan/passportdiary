@@ -1,14 +1,14 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App.tsx';
-import { initDesign } from './designs/design.ts';
 import './styles.css';
-import './designs/shared.css';
-import './designs/one.css';
-import './designs/two.css';
-import './designs/three.css';
 
-initDesign();
+try {
+  // Left behind by an earlier version that offered several designs.
+  localStorage.removeItem('passportdiary.design');
+} catch {
+  // Storage can be unavailable (private mode).
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

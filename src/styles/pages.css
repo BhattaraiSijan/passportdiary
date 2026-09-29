@@ -1,0 +1,445 @@
+/* The two pages: on the left the summary and the key, on the right the list of
+   destinations or one opened country. They are the same size and mirror each other. */
+
+.brief,
+.side {
+  position: relative;
+  /* Above the globe's glow, which must not fall on the pages. */
+  z-index: 2;
+  background: var(--paper);
+  border: var(--edge);
+  border-radius: var(--radius);
+}
+
+.brief {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 18px 18px 14px;
+}
+
+/* Summary */
+
+.summary {
+  display: grid;
+  gap: 6px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.summary h2 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.summary p {
+  font-size: 0.9375rem;
+  color: var(--ink-soft);
+}
+
+.summary .figure {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 2.7rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--blue);
+}
+
+/* Key. Each entry is also a filter. */
+
+.legend {
+  display: grid;
+  gap: 2px;
+  font-size: 0.9375rem;
+}
+
+.legend-item,
+.legend-note {
+  display: grid;
+  grid-template-columns: 14px 1fr auto;
+  align-items: center;
+  gap: 0 10px;
+  width: 100%;
+  padding: 5px 8px;
+  text-align: left;
+}
+
+.legend-item {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.legend-item:hover {
+  background: var(--blue-wash);
+  border-color: var(--line);
+}
+
+.legend-item[aria-pressed='true'] {
+  color: var(--paper);
+  background: var(--blue);
+  border-color: var(--blue-ink);
+}
+
+.legend-item .swatch {
+  align-self: start;
+  margin-top: 3px;
+}
+
+.legend-item > span:nth-child(2) {
+  font-weight: 600;
+}
+
+.legend-help {
+  grid-column: 2 / -1;
+  font-size: 0.78rem;
+  line-height: 1.3;
+  color: var(--ink-soft);
+}
+
+.legend-bar {
+  grid-column: 2 / -1;
+  height: 4px;
+  margin-top: 2px;
+  background: var(--blue-wash);
+  border-radius: 2px;
+}
+
+.legend-bar span {
+  display: block;
+  min-width: 3px;
+  height: 100%;
+  border-radius: 2px;
+}
+
+.legend-item[aria-pressed='true'] .legend-help {
+  color: #dbe6fa;
+}
+
+.legend-item[aria-pressed='true'] .legend-bar {
+  background: rgb(255 255 255 / 0.25);
+}
+
+.legend-note {
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+}
+
+.swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--swatch-edge);
+  border-radius: 3px;
+}
+
+.swatch-hatch {
+  background: repeating-linear-gradient(135deg, #ffffff 0 2px, var(--blue) 2px 5px);
+}
+
+.count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+}
+
+/* Tips */
+
+.hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+  padding-top: 10px;
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+  border-top: 1px solid var(--line);
+}
+
+.hint > span::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 8px;
+  background: var(--green);
+  border: 1px solid var(--green-deep);
+  border-radius: 50%;
+}
+
+.hint-hide {
+  padding: 0;
+  font-size: inherit;
+  color: var(--ink-soft);
+  text-decoration: underline;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+/* List */
+
+.list-tools {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  gap: 8px;
+  padding: 14px 16px 10px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.search {
+  flex: 1;
+}
+
+.group h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 16px 6px;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 650;
+}
+
+.group h3 .count {
+  margin-left: auto;
+  color: var(--ink-soft);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 12px;
+  width: 100%;
+  padding: 8px 16px;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-top: var(--edge-soft);
+  cursor: pointer;
+}
+
+.row:hover {
+  background: var(--blue-wash);
+}
+
+.row-detail {
+  display: grid;
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+  text-align: right;
+}
+
+.flag {
+  grid-column: 1 / -1;
+  justify-self: start;
+  padding: 1px 8px;
+  font-size: var(--step--1);
+  color: var(--warn);
+  background: var(--warn-wash);
+  border: 1px solid #e6c874;
+  border-radius: 99px;
+}
+
+.empty {
+  padding: 20px 16px;
+  color: var(--ink-soft);
+}
+
+/* One country */
+
+.panel {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  padding: 16px;
+}
+
+.panel > .button {
+  justify-self: start;
+}
+
+.panel h2 {
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.panel h2:focus {
+  outline: none;
+}
+
+.requirement {
+  --stamp: var(--blue);
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.requirement[data-category='visa_free'],
+.requirement[data-category='visa_on_arrival'] {
+  --stamp: #1f7446;
+}
+
+.requirement[data-category='eta'] {
+  --stamp: #7a5a00;
+}
+
+.requirement[data-category='no_admission'],
+.requirement[data-category='unknown'] {
+  --stamp: #4a4450;
+}
+
+.requirement[data-category='citizen'] {
+  --stamp: var(--blue-ink);
+}
+
+.requirement h3 {
+  font-size: var(--step--1);
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+/* The answer is stamped on the page. */
+.verdict {
+  display: flex;
+  justify-self: start;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 6px 10px;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--stamp);
+  border: 1.5px solid var(--stamp);
+  border-radius: 8px;
+  outline: 1px solid var(--stamp);
+  outline-offset: 2px;
+  transform: rotate(-1.5deg);
+}
+
+.verdict .swatch {
+  border-radius: 50%;
+}
+
+.requirement dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 16px;
+  font-size: var(--step--1);
+}
+
+.requirement dt {
+  color: var(--ink-soft);
+}
+
+.claims {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  font-size: var(--step--1);
+  color: var(--warn);
+  background: var(--warn-wash);
+  border: 1px solid #e6c874;
+  border-radius: 8px;
+}
+
+.claims ul {
+  padding-left: 18px;
+  list-style: disc;
+}
+
+.links {
+  font-size: var(--step--1);
+}
+
+.caution {
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+}
+
+/* Below the globe, side by side, the pages scroll inside themselves. */
+@media (min-width: 821px) and (max-width: 1100px) {
+  .brief,
+  .side {
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+}
+
+/* Beside the globe: two facing pages of equal size. */
+@media (min-width: 1101px) {
+  .brief,
+  .side {
+    position: absolute;
+    top: var(--head);
+    bottom: calc(var(--foot) + 8px);
+    width: var(--page);
+    overflow-y: auto;
+  }
+
+  .brief {
+    left: var(--gutter);
+  }
+
+  .side {
+    right: var(--gutter);
+  }
+
+  .brief .hint {
+    margin-top: auto;
+  }
+}
+
+/* Short screens: the left page tightens so that all of it shows without scrolling. */
+@media (min-width: 1101px) and (max-height: 880px) {
+  .brief {
+    gap: 8px;
+    padding: 14px 16px 10px;
+  }
+
+  .summary {
+    gap: 2px;
+    padding-bottom: 8px;
+  }
+
+  .summary h2 {
+    font-size: 1.35rem;
+  }
+
+  .summary .figure {
+    font-size: 2.1rem;
+  }
+
+  .summary p,
+  .legend {
+    font-size: 0.875rem;
+  }
+
+  .legend-item,
+  .legend-note {
+    padding: 3px 8px;
+  }
+
+  .legend-help {
+    font-size: 0.75rem;
+  }
+
+  .hint {
+    padding-top: 8px;
+    font-size: 0.78rem;
+  }
+}

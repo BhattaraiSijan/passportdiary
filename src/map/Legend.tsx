@@ -1,6 +1,5 @@
 import { CATEGORIES } from '../data/categories.ts';
-import { CATEGORY_HELP, CATEGORY_LABELS, CATEGORY_SHORT_HELP } from '../data/labels.ts';
-import { useTheme } from '../designs/themes.ts';
+import { CATEGORY_LABELS, CATEGORY_SHORT_HELP } from '../data/labels.ts';
 import {
   countByCategory,
   countByDifference,
@@ -8,26 +7,29 @@ import {
 } from '../features/compare/compare.ts';
 import { useStore, type Filter } from '../state/store.ts';
 import type { View } from '../state/useView.ts';
+import { CATEGORY_COLORS, DIFFERENCE_COLORS } from './palette.ts';
 
-export interface Entry {
+interface Entry {
   key: NonNullable<Filter>;
   label: string;
+  // One line that says what the term means.
   help?: string;
-  shortHelp?: string;
   color: string;
   count: number;
 }
 
-// The legend, the proportion bar and the summary all read the same entries.
-export function useLegendEntries(view: View): { entries: Entry[]; byDifference: boolean } {
+// The key to the globe. Each entry is also a filter.
+export function Legend({ view }: { view: View }) {
   const base = useStore((s) => s.base)!;
+  const filter = useStore((s) => s.filter);
+  const setFilter = useStore((s) => s.setFilter);
   const compareMode = useStore((s) => s.compareMode);
-  const theme = useTheme();
 
   const nameA = base.byId.get(view.fileA.passport)?.name ?? view.fileA.passport;
   const nameB = view.fileB ? (base.byId.get(view.fileB.passport)?.name ?? view.fileB.passport) : '';
   const byDifference = view.comparing && compareMode === 'difference';
 
+  let entries: Entry[];
   if (byDifference) {
     const counts = countByDifference(view.cells);
     const labels: Record<Difference, string> = {
@@ -35,37 +37,22 @@ export function useLegendEntries(view: View): { entries: Entry[]; byDifference: 
       b_better: `Easier with ${nameB}`,
       same: 'Same for both',
     };
-    const entries = (Object.keys(labels) as Difference[]).map((key) => ({
+    entries = (Object.keys(labels) as Difference[]).map((key) => ({
       key,
       label: labels[key],
-      color: theme.differences[key],
+      color: DIFFERENCE_COLORS[key],
       count: counts[key],
     }));
-    return { entries, byDifference };
+  } else {
+    const counts = countByCategory(view.cells);
+    entries = CATEGORIES.filter((c) => c !== 'unknown' && counts[c] > 0).map((key) => ({
+      key,
+      label: CATEGORY_LABELS[key],
+      help: CATEGORY_SHORT_HELP[key],
+      color: CATEGORY_COLORS[key],
+      count: counts[key],
+    }));
   }
-  const counts = countByCategory(view.cells);
-  const entries = CATEGORIES.filter((c) => c !== 'unknown' && counts[c] > 0).map((key) => ({
-    key,
-    label: CATEGORY_LABELS[key],
-    help: CATEGORY_HELP[key],
-    shortHelp: CATEGORY_SHORT_HELP[key],
-    color: theme.categories[key],
-    count: counts[key],
-  }));
-  return { entries, byDifference };
-}
-
-interface Props {
-  view: View;
-  // Adds a line under each entry that says what the term means.
-  explain?: boolean;
-}
-
-export function Legend({ view, explain = false }: Props) {
-  const filter = useStore((s) => s.filter);
-  const setFilter = useStore((s) => s.setFilter);
-  const theme = useTheme();
-  const { entries, byDifference } = useLegendEntries(view);
   const most = Math.max(1, ...entries.map((e) => e.count));
 
   return (
@@ -76,20 +63,15 @@ export function Legend({ view, explain = false }: Props) {
             type="button"
             className="legend-item"
             aria-pressed={filter === e.key}
-            title={explain ? undefined : e.help}
             onClick={() => setFilter(filter === e.key ? null : e.key)}
           >
             <span className="swatch" style={{ background: e.color }} />
             <span>{e.label}</span>
             <span className="count">{e.count}</span>
-            {explain && (
-              <>
-                {e.shortHelp && <span className="legend-help">{e.shortHelp}</span>}
-                <span className="legend-bar" aria-hidden="true">
-                  <span style={{ width: `${(e.count / most) * 100}%`, background: e.color }} />
-                </span>
-              </>
-            )}
+            {e.help && <span className="legend-help">{e.help}</span>}
+            <span className="legend-bar" aria-hidden="true">
+              <span style={{ width: `${(e.count / most) * 100}%`, background: e.color }} />
+            </span>
           </button>
         </li>
       ))}
@@ -100,7 +82,7 @@ export function Legend({ view, explain = false }: Props) {
         </li>
       )}
       <li className="legend-note">
-        <span className="swatch" style={{ background: theme.categories.unknown }} />
+        <span className="swatch" style={{ background: CATEGORY_COLORS.unknown }} />
         <span>No data</span>
       </li>
     </ul>

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { CATEGORIES } from '../../data/categories.ts';
 import { CATEGORY_LABELS, formatStay } from '../../data/labels.ts';
 import type { Country, Requirement } from '../../data/schema.ts';
-import { useTheme } from '../../designs/themes.ts';
+import { CATEGORY_COLORS, DIFFERENCE_COLORS } from '../../map/palette.ts';
 import { useStore } from '../../state/store.ts';
 import type { View } from '../../state/useView.ts';
 import type { Cell, Difference } from '../compare/compare.ts';
@@ -31,7 +31,6 @@ export function DestinationList({ view }: { view: View }) {
   const select = useStore((s) => s.select);
   const compareMode = useStore((s) => s.compareMode);
   const [query, setQuery] = useState('');
-  const theme = useTheme();
 
   const byDifference = view.comparing && compareMode === 'difference';
   const nameA = base.byId.get(view.fileA.passport)?.name ?? view.fileA.passport;
@@ -50,17 +49,17 @@ export function DestinationList({ view }: { view: View }) {
       ? DIFFERENCES.map((key) => ({
           key,
           label: { a_better: `Easier with ${nameA}`, b_better: `Easier with ${nameB}`, same: 'Same for both' }[key],
-          color: theme.differences[key],
+          color: DIFFERENCE_COLORS[key],
           rows: rows.filter((r) => r.cell.difference === key),
         }))
       : CATEGORIES.map((key) => ({
           key,
           label: CATEGORY_LABELS[key],
-          color: theme.categories[key],
+          color: CATEGORY_COLORS[key],
           rows: rows.filter((r) => r.cell.category === key),
         }));
     return all.filter((g) => g.rows.length > 0 && (!filter || filter === g.key));
-  }, [base, view, query, filter, byDifference, nameA, nameB, theme]);
+  }, [base, view, query, filter, byDifference, nameA, nameB]);
 
   return (
     <section className="list" aria-label="Destinations">

@@ -1,0 +1,91 @@
+/* The globe and the plate it is printed on. Globe.tsx publishes where the globe
+   is (--globe-x, --globe-y, --globe-r), so the ring can follow it. */
+
+.globe {
+  position: absolute;
+  inset: 0;
+}
+
+.globe .maplibregl-map {
+  z-index: 1;
+  background: transparent;
+}
+
+/* The plate: a ruled ring around the globe, as around a printed hemisphere. */
+.globe::before,
+.globe::after {
+  content: '';
+  position: absolute;
+  left: var(--globe-x, 50%);
+  top: var(--globe-y, 50%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.globe::before {
+  width: calc(2 * var(--globe-r, 0px) + 14px);
+  height: calc(2 * var(--globe-r, 0px) + 14px);
+  background: var(--blue-ink);
+  border: 1px solid rgb(255 255 255 / 0.85);
+  box-shadow: 0 0 90px 18px rgb(126 170 255 / 0.28);
+}
+
+.globe::after {
+  width: calc(2 * var(--globe-r, 0px) + 40px);
+  height: calc(2 * var(--globe-r, 0px) + 40px);
+  background: repeating-conic-gradient(var(--on-ground-soft) 0 0.35deg, transparent 0.35deg 5deg);
+  opacity: 0.8;
+  mask: radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 7px));
+}
+
+.globe-message {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 24px;
+  color: var(--on-ground);
+  text-align: center;
+}
+
+.globe .globe-message {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 2;
+  height: auto;
+  background: var(--blue-ink);
+  border-top: 1px solid var(--hairline);
+}
+
+.tooltip {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  gap: 1px;
+  max-width: 240px;
+  padding: 7px 10px;
+  font-size: var(--step--1);
+  color: var(--on-ground);
+  background: var(--blue-ink);
+  border: 1px solid var(--on-ground);
+  border-radius: 6px;
+  pointer-events: none;
+  transform: translate(14px, 14px);
+}
+
+@media (max-width: 820px) {
+  .globe,
+  .globe-area > .globe-message {
+    position: relative;
+    inset: auto;
+    /* Square, so the globe fills the width without empty space above and below */
+    height: min(100vw - 28px, 58vh);
+    min-height: 300px;
+  }
+
+  .globe::after {
+    width: calc(2 * var(--globe-r, 0px) + 30px);
+    height: calc(2 * var(--globe-r, 0px) + 30px);
+    mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px));
+  }
+}

@@ -1,7 +1,7 @@
-// Takes the screenshots in design/screens/ from a running dev server.
-// Usage: npm run design:screens -- [design] [size...] [--states=a,b] [--out=dir] [--base=url]
-//   design  1 (default), 0, 2 or 3
-//   size    wide, laptop, phone, tablet (default: wide, laptop and phone)
+// Takes the screenshots in docs/screens/ from a running dev server
+// (npx vite --port 5183 --strictPort).
+// Usage: npm run screens -- [size...] [--states=a,b] [--out=dir] [--base=url]
+//   size    wide, laptop, tablet, phone (default: all four)
 //   states  empty, nepal, detail, compare, compare-differ (default: all)
 /* global process, console, window, document */
 import { chromium } from '@playwright/test';
@@ -10,13 +10,12 @@ const args = process.argv.slice(2);
 const option = (name, fallback) =>
   args.find((a) => a.startsWith(`--${name}=`))?.split('=')[1] ?? fallback;
 const plain = args.filter((a) => !a.startsWith('--'));
-const design = /^[0-3]$/.test(plain[0] ?? '') ? plain.shift() : '1';
 const states = option('states', 'empty,nepal,detail,compare,compare-differ').split(',');
-const out = option('out', 'design/screens');
+const out = option('out', 'docs/screens');
 const base = option('base', 'http://localhost:5183');
 
 const SIZES = { wide: [1917, 928], laptop: [1360, 820], tablet: [1000, 760], phone: [390, 844] };
-const sizes = plain.length ? plain : ['wide', 'laptop', 'phone'];
+const sizes = plain.length ? plain : Object.keys(SIZES);
 
 const browser = await chromium.launch({
   // Software WebGL, so the globe renders on machines without a GPU.
@@ -40,17 +39,17 @@ for (const size of sizes) {
     if (!states.includes(state)) return;
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.waitForTimeout(300);
-    await page.screenshot({ path: `${out}/${design}-${size}-${state}.png` });
+    await page.screenshot({ path: `${out}/${size}-${state}.png` });
     if (process.env.FULL) {
       const full = await page.evaluate(() => document.documentElement.scrollHeight);
       await page.screenshot({
-        path: `${out}/${design}-${size}-${state}-full.png`,
+        path: `${out}/${size}-${state}-full.png`,
         fullPage: true,
         clip: { x: 0, y: 0, width, height: Math.min(full, 2600) },
         scale: 'css',
       });
     }
-    console.log(`${design}-${size}-${state}`);
+    console.log(`${size}-${state}`);
   };
   const choose = async (label, text) => {
     const box = page.getByRole('combobox', { name: label });
@@ -58,12 +57,8 @@ for (const size of sizes) {
     await box.fill(text);
     await page.keyboard.press('Enter');
   };
-  const openList = async () => {
-    const toggle = page.getByRole('button', { name: 'Show all destinations' });
-    if (await toggle.isVisible()) await toggle.click();
-  };
-
-  await page.goto(`${base}/?design=${design}`);
+  await page.goto(`${base}/`);
+  if (process.env.HIDE) await page.addStyleTag({ content: process.env.HIDE });
   await page.waitForTimeout(3500);
   await shot('empty');
 
@@ -84,7 +79,6 @@ for (const size of sizes) {
   }
 
   if (states.includes('detail')) {
-    await openList();
     await page.getByPlaceholder('Search destinations').fill('south korea');
     await page.getByRole('button', { name: /South Korea/ }).click();
     await page.waitForTimeout(2500);

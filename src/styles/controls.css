@@ -1,0 +1,220 @@
+/* Fields, buttons and the dialog. */
+
+.select {
+  position: relative;
+  display: grid;
+  width: 220px;
+}
+
+/* The placeholder names each field, so the labels are for screen readers only. */
+.select label,
+.segmented legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.select input,
+.search input {
+  width: 100%;
+  padding: 9px 12px;
+  color: var(--ink);
+  background: var(--paper);
+  border: var(--edge);
+  border-radius: 8px;
+}
+
+.select input {
+  text-overflow: ellipsis;
+}
+
+.header .select input {
+  padding: 6px 34px 6px 11px;
+  font-size: 0.9375rem;
+}
+
+.select input::placeholder {
+  color: var(--ink-soft);
+}
+
+/* The field shows that it opens a list. */
+.select::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+
+.select-list {
+  position: absolute;
+  top: 100%;
+  z-index: 5;
+  width: 100%;
+  max-height: 320px;
+  margin-top: 4px;
+  overflow-y: auto;
+  color: var(--ink);
+  background: var(--paper);
+  border: var(--edge);
+  border-radius: 8px;
+  box-shadow: 0 12px 28px rgb(15 42 87 / 0.35);
+}
+
+.select-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+
+.select-list .is-active {
+  background: var(--blue-wash);
+}
+
+.select-list [aria-selected='true'] {
+  font-weight: 650;
+}
+
+.select-list .code,
+.select-list .select-empty {
+  color: var(--ink-soft);
+}
+
+.select-list .select-empty {
+  cursor: default;
+}
+
+.button {
+  padding: 9px 16px;
+  font-weight: 600;
+  color: var(--blue-ink);
+  background: var(--green);
+  border: 1px solid var(--green-deep);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: #84dba0;
+}
+
+.header .button {
+  padding: 6px 11px;
+  font-size: 0.9375rem;
+  font-weight: 550;
+}
+
+.header .button-quiet,
+.segmented label span {
+  color: var(--on-ground);
+  background: rgb(16 38 77 / 0.35);
+  border: 1px solid var(--hairline);
+}
+
+.header .button-quiet:hover,
+.segmented label span:hover {
+  background: rgb(16 38 77 / 0.7);
+}
+
+.side .button-quiet {
+  padding: 6px 12px;
+  color: var(--blue);
+  background: var(--blue-wash);
+  border: 1px solid #8fa6cf;
+}
+
+.link {
+  padding: 0;
+  text-decoration: underline;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.segmented {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.segmented label span {
+  display: block;
+  padding: 6px 11px;
+  font-size: 0.9375rem;
+  cursor: pointer;
+}
+
+.segmented label:first-of-type span {
+  border-radius: 8px 0 0 8px;
+}
+
+.segmented label:last-of-type span {
+  border-left: 0;
+  border-radius: 0 8px 8px 0;
+}
+
+.segmented input {
+  position: absolute;
+  opacity: 0;
+}
+
+.segmented input:checked + span {
+  font-weight: 600;
+  color: var(--blue-ink);
+  background: var(--green);
+  border-color: var(--green);
+}
+
+.segmented input:focus-visible + span {
+  outline: 2px solid var(--on-ground);
+  outline-offset: 2px;
+}
+
+.dialog {
+  width: min(560px, calc(100vw - 32px));
+  padding: 24px;
+  color: var(--ink);
+  border: var(--edge);
+  border-radius: var(--radius);
+}
+
+.dialog::backdrop {
+  background: rgb(15 42 87 / 0.6);
+}
+
+.dialog h2 {
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+}
+
+.dialog h3 {
+  margin-top: 16px;
+  font-size: var(--step-0);
+}
+
+.dialog p {
+  margin-top: 6px;
+}
+
+.dialog form {
+  margin-top: 20px;
+}
+
+@media (max-width: 820px) {
+  .select {
+    width: min(100%, 320px);
+  }
+}

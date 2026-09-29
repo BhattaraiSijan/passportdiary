@@ -1,36 +1,65 @@
-@import '@fontsource-variable/schibsted-grotesk';
+/* PassportDiary: the Visa page design.
+   A printed travel document. The ground is the blue cloth of a passport cover.
+   On it lie two white pages and, between them, the globe as a printed plate. */
+
+@import '@fontsource-variable/besley';
+@import '@fontsource-variable/public-sans';
+@import './styles/layout.css';
+@import './styles/controls.css';
+@import './styles/globe.css';
+@import './styles/pages.css';
+@import './styles/start.css';
 
 :root {
-  /* Primary: mid blue leaning dark. Secondary: mid green leaning light. */
-  --blue: #1f4e9c;
-  --blue-deep: #163a75;
-  --blue-ink: #0f2a57;
-  --blue-wash: #e9eff9;
-  --green: #6fcf8e;
-  --green-deep: #2f8f57;
+  /* Primary: a mid blue leaning dark. It is the ground of every screen. */
+  --bg: #1f4e9c;
+  --ground-glow: #2a5fb5;
+  --ground-edge: #143468;
+  /* The same blue where it sits on white: links, figures, the stamp. */
+  --blue: #21509f;
+  --blue-deep: #173c7c;
+  --blue-ink: #10264d;
+  --blue-wash: #e8eef9;
+
+  /* Secondary: a mid green leaning light. It is the accent on the blue. */
+  --green: #6ecb93;
+  --green-deep: #2b8454;
+
   --paper: #ffffff;
-  --ink: #14233f;
-  --ink-soft: #4d5f80;
-  --line: #d5deee;
+  --ink: #10264d;
+  --ink-soft: #485a7e;
+  --on-ground: #ffffff;
+  --on-ground-soft: #dfe8fa;
   --warn: #8a5a00;
   --warn-wash: #fff4d6;
 
-  /* Every surface carries the same thin edge: never borderless, never heavy. */
-  --edge: 1px solid #0f2a57;
+  /* Every surface has a thin edge: never borderless, never heavy. */
+  --line: #ccd7ea;
+  --edge: 1px solid var(--ink);
   --edge-soft: 1px solid var(--line);
-  --edge-on-blue: 1px solid rgb(255 255 255 / 0.55);
+  --hairline: rgb(255 255 255 / 0.42);
+  --swatch-edge: rgb(16 38 77 / 0.45);
 
-  --side-width: 400px;
+  /* Green on the ground, blue on white (set where the white surfaces are). */
+  --focus: var(--green);
+
   --gutter: 20px;
+  --radius: 14px;
+  /* The two pages beside the globe, and the room the header and footer take. */
+  --page: clamp(300px, 23vw, 400px);
+  --head: 104px;
+  --foot: 46px;
 
-  --radius: 10px;
   --step--1: 0.833rem;
   --step-0: 1rem;
   --step-1: 1.2rem;
   --step-2: 1.44rem;
   --step-3: 1.728rem;
 
-  font-family: 'Schibsted Grotesk Variable', system-ui, sans-serif;
+  --font-display: 'Besley Variable', Georgia, serif;
+  --font-text: 'Public Sans Variable', system-ui, sans-serif;
+
+  font-family: var(--font-text);
   font-size: 16px;
   line-height: 1.45;
   color: var(--ink);
@@ -48,9 +77,19 @@ body,
   height: 100%;
 }
 
+/* The ground: lighter behind the globe, deeper at the edges. */
 body {
   margin: 0;
-  background: var(--blue);
+  color: var(--ink);
+  background:
+    radial-gradient(
+        ellipse 75% 85% at 50% 54%,
+        var(--ground-glow) 0%,
+        var(--bg) 46%,
+        var(--ground-edge) 100%
+      )
+      fixed,
+    var(--bg);
 }
 
 h1,
@@ -79,8 +118,12 @@ input {
 }
 
 :focus-visible {
-  outline: 2px solid var(--green);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
+}
+
+:is(.brief, .side, .dialog, .select-list) {
+  --focus: var(--blue);
 }
 
 .visually-hidden {
@@ -92,661 +135,21 @@ input {
   white-space: nowrap;
 }
 
-/* Layout */
-
-.app {
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  height: 100%;
+@media (max-width: 1100px) {
+  body {
+    background: linear-gradient(var(--ground-glow), var(--bg) 35%, var(--ground-edge)) var(--bg);
+  }
 }
-
-/* Name on the left, controls in the middle, and an equal empty column on the
-   right so the controls sit on the page's centre line, above the globe. */
-.header {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: center;
-  gap: 8px 20px;
-  padding: 12px var(--gutter);
-  color: var(--paper);
-}
-
-.header h1 {
-  font-size: var(--step-2);
-  font-weight: 750;
-  letter-spacing: -0.02em;
-  line-height: 1;
-}
-
-/* With one passport the field itself sits on the centre line and the button hangs to its right. */
-.controls-single {
-  position: relative;
-}
-
-.controls-single > .button {
-  position: absolute;
-  top: 0;
-  left: calc(100% + 8px);
-  white-space: nowrap;
-}
-
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-}
-
-/* The globe spans the whole stage; legend and side panel sit over its edges. */
-.stage {
-  position: relative;
-  min-height: 0;
-}
-
-.globe-area {
-  position: absolute;
-  inset: 0;
-}
-
-.side {
-  position: absolute;
-  inset: 0 var(--gutter) 0 auto;
-  z-index: 1;
-  width: var(--side-width);
-  overflow-y: auto;
-  background: var(--paper);
-  border: var(--edge);
-  border-radius: var(--radius);
-}
-
-.footer {
-  margin-top: 12px;
-  padding: 10px var(--gutter) 12px;
-  text-align: center;
-  border-top: var(--edge-on-blue);
-  font-size: var(--step--1);
-  color: #d6e2f7;
-}
-
-.footer a,
-.footer .link {
-  color: var(--paper);
-}
-
-/* Globe */
-
-.globe {
-  position: absolute;
-  inset: 0;
-}
-
-.globe .maplibregl-map {
-  background: transparent;
-}
-
-.globe-message {
-  display: grid;
-  place-items: center;
-  height: 100%;
-  padding: 24px;
-  color: var(--paper);
-  text-align: center;
-}
-
-.globe .globe-message {
-  position: absolute;
-  inset: auto 0 0 0;
-  height: auto;
-  background: var(--blue-ink);
-}
-
-.tooltip {
-  position: absolute;
-  z-index: 2;
-  display: grid;
-  gap: 1px;
-  max-width: 240px;
-  padding: 7px 10px;
-  font-size: var(--step--1);
-  color: var(--paper);
-  background: var(--blue-ink);
-  border: var(--edge-on-blue);
-  border-radius: 6px;
-  pointer-events: none;
-  transform: translate(14px, 14px);
-}
-
-/* Legend */
-
-.legend {
-  position: absolute;
-  left: var(--gutter);
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 1;
-  display: grid;
-  gap: 2px;
-  padding: 8px;
-  font-size: var(--step--1);
-  background: var(--paper);
-  border: var(--edge);
-  border-radius: var(--radius);
-}
-
-.legend-item,
-.legend-note {
-  display: grid;
-  grid-template-columns: 14px 1fr auto;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 4px 8px;
-  text-align: left;
-}
-
-.legend-item {
-  background: none;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.legend-item:hover {
-  background: var(--blue-wash);
-  border-color: var(--line);
-}
-
-.legend-item[aria-pressed='true'] {
-  color: var(--paper);
-  background: var(--blue);
-  border-color: var(--blue-ink);
-}
-
-.legend-note {
-  color: var(--ink-soft);
-}
-
-.swatch {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  border: 1px solid rgb(15 42 87 / 0.35);
-  border-radius: 3px;
-}
-
-.swatch-hatch {
-  background: repeating-linear-gradient(
-    135deg,
-    var(--blue-deep) 0 2px,
-    var(--paper) 2px 5px
-  );
-}
-
-.count {
-  font-variant-numeric: tabular-nums;
-  font-weight: 650;
-}
-
-/* Controls */
-
-.select {
-  position: relative;
-  display: grid;
-  width: 220px;
-}
-
-/* The placeholder names each field, so the labels are for screen readers only. */
-.select label,
-.segmented legend {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-.header .select input,
-.header .button,
-.header .segmented label span {
-  padding: 6px 11px;
-  font-size: 0.9375rem;
-}
-
-.header .button {
-  font-weight: 550;
-}
-
-.select input,
-.search input {
-  width: 100%;
-  padding: 9px 12px;
-  color: var(--ink);
-  background: var(--paper);
-  border: var(--edge);
-  border-radius: 8px;
-}
-
-.select input::placeholder {
-  color: var(--ink-soft);
-}
-
-.select-list {
-  position: absolute;
-  top: 100%;
-  z-index: 5;
-  width: 100%;
-  max-height: 320px;
-  margin-top: 4px;
-  overflow-y: auto;
-  color: var(--ink);
-  background: var(--paper);
-  border: var(--edge);
-  border-radius: 8px;
-  box-shadow: 0 12px 28px rgb(15 42 87 / 0.35);
-}
-
-.select-list li {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 7px 12px;
-  cursor: pointer;
-}
-
-.select-list .is-active {
-  background: var(--blue-wash);
-}
-
-.select-list [aria-selected='true'] {
-  font-weight: 650;
-}
-
-.select-list .code {
-  color: var(--ink-soft);
-}
-
-.select-list .select-empty {
-  color: var(--ink-soft);
-  cursor: default;
-}
-
-.button {
-  padding: 9px 16px;
-  font-weight: 600;
-  color: var(--blue-ink);
-  background: var(--green);
-  border: 1px solid var(--green-deep);
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.button:hover {
-  background: #84dba0;
-}
-
-.header .button-quiet {
-  color: var(--paper);
-  background: transparent;
-  border: var(--edge-on-blue);
-}
-
-.header .button-quiet:hover {
-  background: var(--blue-deep);
-}
-
-.side .button-quiet {
-  padding: 6px 12px;
-  color: var(--blue);
-  background: var(--blue-wash);
-  border: var(--edge-soft);
-}
-
-.link {
-  padding: 0;
-  text-decoration: underline;
-  background: none;
-  border: 0;
-  cursor: pointer;
-}
-
-.segmented {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.segmented label span {
-  display: block;
-  padding: 9px 14px;
-  color: var(--paper);
-  border: var(--edge-on-blue);
-  cursor: pointer;
-}
-
-.segmented label:first-of-type span {
-  border-radius: 8px 0 0 8px;
-}
-
-.segmented label:last-of-type span {
-  border-left: 0;
-  border-radius: 0 8px 8px 0;
-}
-
-.segmented input {
-  position: absolute;
-  opacity: 0;
-}
-
-.segmented input:checked + span {
-  font-weight: 600;
-  color: var(--blue-ink);
-  background: var(--green);
-  border-color: var(--green-deep);
-}
-
-.segmented input:focus-visible + span {
-  outline: 2px solid var(--paper);
-  outline-offset: 2px;
-}
-
-/* List */
-
-.list-tools {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  display: flex;
-  gap: 8px;
-  padding: 14px 16px 10px;
-  background: var(--paper);
-  border-bottom: 1px solid var(--line);
-}
-
-.search {
-  flex: 1;
-}
-
-.group h3 {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 16px 16px 6px;
-  font-size: var(--step-0);
-  font-weight: 700;
-}
-
-.group h3 .count {
-  margin-left: auto;
-  color: var(--ink-soft);
-}
-
-.row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 2px 12px;
-  width: 100%;
-  padding: 8px 16px;
-  text-align: left;
-  background: none;
-  border: 0;
-  border-top: var(--edge-soft);
-  cursor: pointer;
-}
-
-.row:hover {
-  background: var(--blue-wash);
-}
-
-.row-detail {
-  display: grid;
-  font-size: var(--step--1);
-  color: var(--ink-soft);
-  text-align: right;
-}
-
-.flag {
-  grid-column: 1 / -1;
-  justify-self: start;
-  padding: 1px 8px;
-  font-size: var(--step--1);
-  color: var(--warn);
-  background: var(--warn-wash);
-  border: 1px solid #e6c874;
-  border-radius: 99px;
-}
-
-.empty {
-  padding: 20px 16px;
-  color: var(--ink-soft);
-}
-
-/* Detail panel */
-
-.panel {
-  display: grid;
-  gap: 14px;
-  align-content: start;
-  padding: 16px;
-}
-
-.panel > .button {
-  justify-self: start;
-}
-
-.panel h2 {
-  font-size: var(--step-3);
-  font-weight: 750;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-}
-
-.panel h2:focus {
-  outline: none;
-}
-
-/* Opening prompt, set straight on the stage beside the globe */
-
-.intro {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  left: var(--gutter);
-  z-index: 1;
-  display: grid;
-  gap: 10px;
-  max-width: 30ch;
-  color: var(--paper);
-  pointer-events: none;
-}
-
-.intro h2 {
-  font-size: var(--step-3);
-  font-weight: 750;
-  letter-spacing: -0.02em;
-  line-height: 1.12;
-}
-
-.intro p {
-  max-width: 34ch;
-  color: #d6e2f7;
-}
-
-.requirement {
-  display: grid;
-  gap: 10px;
-  padding: 14px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-}
-
-.requirement h3 {
-  font-size: var(--step--1);
-  font-weight: 500;
-  color: var(--ink-soft);
-}
-
-.verdict {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: var(--step-2);
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.verdict .swatch {
-  width: 18px;
-  height: 18px;
-}
-
-.requirement dl {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 4px 16px;
-  font-size: var(--step--1);
-}
-
-.requirement dt {
-  color: var(--ink-soft);
-}
-
-.claims {
-  display: grid;
-  gap: 6px;
-  padding: 10px 12px;
-  font-size: var(--step--1);
-  color: var(--warn);
-  background: var(--warn-wash);
-  border: 1px solid #e6c874;
-  border-radius: 8px;
-}
-
-.claims ul {
-  padding-left: 18px;
-  list-style: disc;
-}
-
-.links {
-  font-size: var(--step--1);
-}
-
-.caution {
-  font-size: var(--step--1);
-  color: var(--ink-soft);
-}
-
-/* Notices and dialog */
-
-.notice {
-  display: grid;
-  gap: 12px;
-  place-content: center;
-  justify-items: start;
-  height: 100%;
-  padding: 24px;
-  color: var(--paper);
-}
-
-.dialog {
-  width: min(560px, calc(100vw - 32px));
-  padding: 24px;
-  color: var(--ink);
-  border: var(--edge);
-  border-radius: var(--radius);
-}
-
-.dialog::backdrop {
-  background: rgb(15 42 87 / 0.6);
-}
-
-.dialog h2 {
-  font-size: var(--step-2);
-}
-
-.dialog h3 {
-  margin-top: 16px;
-  font-size: var(--step-0);
-}
-
-.dialog p {
-  margin-top: 6px;
-}
-
-.dialog form {
-  margin-top: 20px;
-}
-
-/* Small screens: globe on top, list below */
 
 @media (max-width: 820px) {
   :root {
     --gutter: 14px;
   }
+}
 
-  .app {
-    height: auto;
-    min-height: 100%;
-  }
-
-  .header {
-    grid-template-columns: minmax(0, 1fr);
-    justify-items: center;
-  }
-
-  .select {
-    width: min(100%, 320px);
-  }
-
-  .controls-single > .button {
-    position: static;
-  }
-
-  .stage {
-    display: grid;
-    gap: 12px;
-    padding: 0 var(--gutter);
-  }
-
-  .globe-area {
-    position: static;
-    display: grid;
-    gap: 10px;
-  }
-
-  .intro {
-    position: static;
-    order: -1;
-    max-width: none;
-    text-align: center;
-    transform: none;
-  }
-
-  .intro p {
-    max-width: none;
-  }
-
-  .globe,
-  .globe-area > .globe-message {
-    position: relative;
-    /* Square, so the globe fills the width without empty space above and below */
-    height: min(100vw - 28px, 58vh);
-    min-height: 300px;
-  }
-
-  .legend {
-    position: static;
-    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-    transform: none;
-  }
-
-  .side {
-    position: static;
-    width: auto;
-    overflow: visible;
+/* Short screens: the header takes a little less room. */
+@media (min-width: 1101px) and (max-height: 880px) {
+  :root {
+    --head: 100px;
   }
 }

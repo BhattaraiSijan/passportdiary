@@ -41,19 +41,16 @@ function liesOver(el: HTMLElement): boolean {
 }
 
 // Surfaces that lie over the map say which edge they sit on with `data-frame`.
-// `data-frame-shift` moves the globe's centre without making the globe smaller.
-function measure(map: MapLibre, attribute: string): Padding {
+function measure(map: MapLibre): Padding {
   const box = map.getContainer().getBoundingClientRect();
   const padding = { ...NONE };
-  for (const el of document.querySelectorAll<HTMLElement>(`[${attribute}]`)) {
+  for (const el of document.querySelectorAll<HTMLElement>('[data-frame]')) {
     if (!liesOver(el)) continue;
-    // A surface can opt out in the stylesheet, e.g. when it is meant to lie on the globe.
-    if (getComputedStyle(el).getPropertyValue('--frame').trim() === 'none') continue;
     const rect = el.getBoundingClientRect();
     if (rect.width === 0 || rect.height === 0) continue;
     if (rect.right <= box.left || rect.left >= box.right) continue;
     if (rect.bottom <= box.top || rect.top >= box.bottom) continue;
-    const edge = el.getAttribute(attribute) as Edge;
+    const edge = el.dataset.frame as Edge;
     const reach = {
       top: rect.bottom - box.top,
       bottom: box.bottom - rect.top,
@@ -66,85 +63,49 @@ function measure(map: MapLibre, attribute: string): Padding {
 }
 
 export interface Frame {
-  zoom: number;
   padding: Padding;
+  // Set when the globe has a fixed place to look at, as on the start screen.
   center?: [number, number];
-  // Degrees to look south of a place, so that it shows above a sheet that
-  // covers the lower part of the globe.
-  look: number;
-  // Padding that moves the globe's centre above that sheet instead. Used when
-  // the globe is zoomed in so far that turning it would not help.
-  shifted: Padding;
-  // Gives the zoom for another latitude, as the globe grows towards the poles.
+  // The zoom that fits at a latitude. The globe grows towards the poles at the same zoom.
   zoomAt: (latitude: number) => number;
 }
 
-const DOME_CENTER: [number, number] = [48, 12];
+// How much of the free space the globe fills. The rest is room for its ring.
+const FILL = 0.9;
+const START_CENTER: [number, number] = [48, 12];
 
-// The start screen of the main design: a very large globe rises from the bottom
-// edge. The map keeps its size, so the globe can glide from here to its place.
-function domeFrame(top: number, width: number, height: number): Frame {
+// The start screen: a very large globe rises from the bottom edge. The map keeps
+// its size, so the globe can glide from here to its place.
+function startFrame(top: number, width: number, height: number): Frame {
   const crown = top + 30;
   const visible = Math.max(height - crown, 120);
   // The map cannot put its centre below its own bottom edge, so at most half shows.
   const diameter = Math.min(visible * 2, width * 1.5);
   const centre = crown + diameter / 2;
-  const padding = { top: Math.max(0, 2 * centre - height), bottom: 0, left: 0, right: 0 };
-  const zoomAt = (lat: number) => zoomForDiameter(diameter, lat, height);
   return {
-    zoom: zoomAt(DOME_CENTER[1]),
-    padding,
-    shifted: padding,
-    look: 0,
-    zoomAt,
-    center: DOME_CENTER,
+    padding: { top: Math.max(0, 2 * centre - height), bottom: 0, left: 0, right: 0 },
+    center: START_CENTER,
+    zoomAt: (latitude) => zoomForDiameter(diameter, latitude, height),
   };
 }
 
-export function designFrame(map: MapLibre, fill: number, latitude = map.getCenter().lat): Frame {
-  const container = map.getContainer();
-  const { clientWidth: width, clientHeight: height } = container;
-  const area = container.closest<HTMLElement>('.globe-area');
-  const padding = measure(map, 'data-frame');
-  // On the start screen of some designs only the top of a very large globe shows.
-  if (area?.dataset.dome === 'pad') return domeFrame(padding.top, width, height);
-  const dome = area?.dataset.dome !== undefined;
-  if (dome) padding.bottom = 0;
+// Where the globe sits and how large it is: as large as the space that the
+// header, the footer and the two pages leave, and on the centre line of the page.
+export function frame(map: MapLibre, started: boolean): Frame {
+  const { clientWidth: width, clientHeight: height } = map.getContainer();
+  const padding = measure(map);
+  if (!started) return startFrame(padding.top, width, height);
 
-  // Keep the globe on the centre line of the page when there is room for it.
   const side = Math.max(padding.left, padding.right);
   if (width - 2 * side >= 240) padding.left = padding.right = side;
 
   const freeWidth = Math.max(width - padding.left - padding.right, 200);
   const freeHeight = Math.max(height - padding.top - padding.bottom, 200);
-  const diameter = dome
-    ? Math.min(freeHeight, freeWidth * 1.7) * fill
-    : Math.min(freeWidth, freeHeight) * fill;
-
-  const shift = measure(map, 'data-frame-shift');
-  let look = 0;
-  const shifted = { ...padding };
-  if (shift.bottom > padding.bottom) {
-    const radius = diameter / 2;
-    const middle = padding.top + freeHeight / 2;
-    const sheetTop = height - shift.bottom;
-    const above = (radius + middle - sheetTop) / 2;
-    if (above > 0) look = (Math.asin(Math.min(above / radius, 0.85)) * 180) / Math.PI;
-    shifted.bottom = Math.min(shift.bottom, height * 0.7);
-  }
-
-  const zoomAt = (lat: number) => zoomForDiameter(diameter, lat, height);
-  return {
-    zoom: zoomAt(dome ? 12 : latitude),
-    padding,
-    look,
-    shifted,
-    zoomAt,
-    ...(dome ? { center: [48, 12] as [number, number] } : {}),
-  };
+  const diameter = Math.min(freeWidth, freeHeight) * FILL;
+  return { padding, zoomAt: (latitude) => zoomForDiameter(diameter, latitude, height) };
 }
 
-// Lines of latitude and longitude, for the designs that draw them.
+// Lines of latitude and longitude.
 export function graticule(step = 20): FeatureCollection {
   const features: FeatureCollection['features'] = [];
   const line = (coordinates: [number, number][]) =>

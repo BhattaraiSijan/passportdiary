@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import { useStore } from '../state/store.ts';
+import { useStore } from '../../state/store.ts';
 
 // Short tips that lead a newcomer to the next thing to try. Each one goes away
 // for good once the person has done what it suggests, or has hidden the tips.
