@@ -43,7 +43,9 @@ public/data/passports/NP.json  one file per passport, loaded on demand
 
 The app only reads `public/data/`, in the format defined in `src/data/schema.ts`. Changing
 or adding a data source means changing the importer, not the app. Generated files are
-committed, and CI fails if they do not match what the scripts produce.
+committed, and CI fails if they do not match what the scripts produce. The shape file
+`world.json` is the exception: its last decimals differ between operating systems, so CI
+validates its structure and joins instead of comparing bytes.
 
 ### Rules the data follows
 

@@ -14,10 +14,13 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+      # world.json is left out: shape simplification differs in the last decimals
+      # between operating systems. It is checked by data:validate instead.
       - name: Generated data is up to date
         run: |
-          npm run data:import && npm run data:shapes
-          git diff --exit-code -- public/data
+          npm run data:build
+          git diff --exit-code -- public/data ':!public/data/world.json'
+          git checkout -- public/data/world.json
       - name: Install browser for end-to-end tests
         run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
