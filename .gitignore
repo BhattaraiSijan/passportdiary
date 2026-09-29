@@ -4,3 +4,5 @@ coverage
 .DS_Store
 *.local
 .vite
+test-results
+playwright-report
