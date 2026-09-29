@@ -36,6 +36,10 @@ test('explains a destination where the sources disagree', async ({ page }) => {
 
   const panel = page.locator('.panel');
   await expect(panel.getByRole('heading', { name: 'South Korea' })).toBeFocused();
+  // The journey is named in full: which passport, to which country.
+  await expect(panel.locator('.route-stop').first()).toHaveText(/Passport\s*Nepal/);
+  await expect(panel.locator('.route-end')).toHaveText(/Destination\s*South Korea/);
+  await expect(page.locator('.summary h2')).toHaveText(/Passport\s*Nepal/);
   await expect(panel.locator('.verdict')).toHaveText('Visa required');
   await expect(panel.locator('.claims')).toContainText('Passport Index: eVisa');
   await expect(panel.locator('.claims')).toContainText('Wikipedia: Visa required');

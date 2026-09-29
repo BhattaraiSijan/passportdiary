@@ -34,7 +34,10 @@ export function Summary({ view }: { view: View }) {
 
   return (
     <div className="summary">
-      <h2>{view.comparing ? `${nameA} and ${nameB}` : nameA}</h2>
+      <h2>
+        <span className="role">{view.comparing ? 'Passports' : 'Passport'}</span>
+        {view.comparing ? `${nameA} and ${nameB}` : nameA}
+      </h2>
       <p>
         <strong className="figure">{figure}</strong> {text}
       </p>

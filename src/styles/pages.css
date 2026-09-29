@@ -29,10 +29,21 @@
 
 .summary h2 {
   font-family: var(--font-display);
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.15;
+}
+
+/* Says what a name is: the passport, or the destination. */
+.role {
+  display: block;
+  margin-bottom: 2px;
+  font-family: var(--font-text);
+  font-size: var(--step--1);
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--ink-soft);
 }
 
 .summary p {
@@ -284,6 +295,58 @@
   line-height: 1.15;
 }
 
+/* The journey, drawn as two stops on a line: passport, then destination. */
+.route {
+  display: grid;
+  gap: 14px;
+}
+
+.route-stop {
+  position: relative;
+  padding-left: 24px;
+}
+
+.route-stop::before {
+  content: '';
+  position: absolute;
+  top: 0.3em;
+  left: 0;
+  width: 11px;
+  height: 11px;
+  background: var(--paper);
+  border: 2px solid var(--blue);
+  border-radius: 50%;
+}
+
+.route-end::before {
+  background: var(--blue);
+}
+
+/* The line from the passport down to the destination. */
+.route-stop:not(.route-end)::after {
+  content: '';
+  position: absolute;
+  top: calc(0.3em + 13px);
+  bottom: calc(-14px - 0.3em + 2px);
+  left: 5px;
+  width: 1px;
+  background: var(--blue);
+}
+
+.route-name {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+.panel h2.route-name {
+  font-size: var(--step-2);
+}
+
 .panel h2:focus {
   outline: none;
 }
@@ -298,9 +361,14 @@
 }
 
 .requirement h3 {
-  font-size: var(--step--1);
+  font-size: 0.9375rem;
   font-weight: 500;
   color: var(--ink-soft);
+}
+
+.requirement h3 strong {
+  font-weight: 700;
+  color: var(--ink);
 }
 
 /* The answer is stamped on the page, in the ink that CountryPanel sets as --stamp. */

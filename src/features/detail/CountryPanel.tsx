@@ -32,7 +32,9 @@ function RequirementCard({
       // The answer is stamped in the ink of its colour.
       style={{ '--stamp': CATEGORY_INKS[requirement.category] } as CSSProperties}
     >
-      <h3>With a passport from {passport.name}</h3>
+      <h3>
+        With a passport from <strong>{passport.name}</strong>
+      </h3>
       <p className="verdict">
         <span className="swatch" style={{ background: CATEGORY_COLORS[requirement.category] }} />
         {CATEGORY_LABELS[requirement.category]}
@@ -124,9 +126,23 @@ export function CountryPanel({ country, view }: { country: Country; view: View |
       <button type="button" className="button button-quiet" onClick={() => select(null)}>
         Back to all destinations
       </button>
-      <h2 id="panel-title" ref={heading} tabIndex={-1}>
-        {country.name}
-      </h2>
+      {/* The journey: which passport, to which country. */}
+      <div className="route">
+        {passportA && (
+          <p className="route-stop">
+            <span className="role">{passportB ? 'Passports' : 'Passport'}</span>
+            <span className="route-name">
+              {passportB ? `${passportA.name} or ${passportB.name}` : passportA.name}
+            </span>
+          </p>
+        )}
+        <div className="route-stop route-end">
+          <span className="role">Destination</span>
+          <h2 id="panel-title" className="route-name" ref={heading} tabIndex={-1}>
+            {country.name}
+          </h2>
+        </div>
+      </div>
 
       {!country.isDestination && (
         <p>
