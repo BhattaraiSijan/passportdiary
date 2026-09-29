@@ -33,7 +33,18 @@ const isCode = (v: unknown): v is string => typeof v === 'string' && /^[A-Z]{2}$
 const upstream = upstreamFileSchema.parse(readJson(resolve(RAW, 'visa-matrix.json')));
 const dataCodes = new Set(upstream.meta.passports);
 const nameToCode = readJson<Record<string, string>>(resolve(RAW, 'countries-iso2.json'));
-const dataNames = new Map(Object.entries(nameToCode).map(([name, code]) => [code, name]));
+// Upstream lists several aliases for some countries; the name we show is chosen explicitly.
+const chosenNames = readJson<Record<string, string>>(resolve(ROOT, 'data/country-names.json'));
+const aliases = new Map<string, string[]>();
+for (const [name, code] of Object.entries(nameToCode)) {
+  aliases.set(code, [...(aliases.get(code) ?? []), name]);
+}
+const dataNames = new Map<string, string>();
+for (const [code, names] of aliases) {
+  const chosen = chosenNames[code] ?? (names.length === 1 ? names[0] : undefined);
+  if (!chosen) throw new Error(`${code} has several names (${names.join(', ')}): pick one in data/country-names.json`);
+  dataNames.set(code, chosen);
+}
 const shapeOverrides = overridesSchema.parse(readJson(resolve(ROOT, 'data/shape-overrides.json')));
 
 const neCountries = readJson<FeatureCollection>(resolve(RAW, 'ne_50m_admin_0_countries.geojson'));
