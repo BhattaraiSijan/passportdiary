@@ -21,7 +21,8 @@ import {
   CATEGORY_COLORS,
   DIFFERENCE_COLORS,
   GRATICULE,
-  HATCH_COLOR,
+  HATCH_DARK,
+  HATCH_LIGHT,
   IDLE,
   MARKER_STROKE,
   NO_DATA_LAND,
@@ -49,7 +50,9 @@ function hatchImage(): ImageData {
   const data = new Uint8ClampedArray(size * size * 4);
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
-      if ((x + y) % size < 2) data.set(HATCH_COLOR, (y * size + x) * 4);
+      const step = (x + y) % size;
+      if (step < 2) data.set(HATCH_LIGHT, (y * size + x) * 4);
+      else if (step < 4) data.set(HATCH_DARK, (y * size + x) * 4);
     }
   }
   return new ImageData(data, size, size);
@@ -144,6 +147,12 @@ export default function Globe({ view, started, reframe = '' }: Props) {
     (center: [number, number] | undefined, minZoom?: number) => {
       const map = mapRef.current;
       if (!map) return;
+      if (!started) {
+        // Back on the start screen: forget where the globe was and how it was zoomed.
+        center = undefined;
+        heading.current = null;
+        zoomedByHand.current = false;
+      }
       // A move that is still under way keeps its destination when the globe is re-framed.
       if (center) heading.current = center;
       else if (map.isMoving() && heading.current) center = heading.current;

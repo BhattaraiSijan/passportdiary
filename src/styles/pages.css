@@ -139,7 +139,12 @@
 }
 
 .swatch-hatch {
-  background: repeating-linear-gradient(135deg, #ffffff 0 2px, var(--blue) 2px 5px);
+  background: repeating-linear-gradient(
+    135deg,
+    #ffffff 0 1.5px,
+    var(--ink) 1.5px 3px,
+    #c9d3e6 3px 5.5px
+  );
 }
 
 .count {
@@ -245,7 +250,7 @@
   font-size: var(--step--1);
   color: var(--warn);
   background: var(--warn-wash);
-  border: 1px solid #e6c874;
+  border: 1px solid var(--warn-edge);
   border-radius: 99px;
 }
 
@@ -288,31 +293,13 @@
   border-radius: 10px;
 }
 
-.requirement[data-category='visa_free'],
-.requirement[data-category='visa_on_arrival'] {
-  --stamp: #1f7446;
-}
-
-.requirement[data-category='eta'] {
-  --stamp: #7a5a00;
-}
-
-.requirement[data-category='no_admission'],
-.requirement[data-category='unknown'] {
-  --stamp: #4a4450;
-}
-
-.requirement[data-category='citizen'] {
-  --stamp: var(--blue-ink);
-}
-
 .requirement h3 {
   font-size: var(--step--1);
   font-weight: 500;
   color: var(--ink-soft);
 }
 
-/* The answer is stamped on the page. */
+/* The answer is stamped on the page, in the ink that CountryPanel sets as --stamp. */
 .verdict {
   display: flex;
   justify-self: start;
@@ -353,7 +340,7 @@
   font-size: var(--step--1);
   color: var(--warn);
   background: var(--warn-wash);
-  border: 1px solid #e6c874;
+  border: 1px solid var(--warn-edge);
   border-radius: 8px;
 }
 

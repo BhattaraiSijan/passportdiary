@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type CSSProperties } from 'react';
 import {
   CATEGORY_HELP,
   CATEGORY_LABELS,
@@ -8,7 +8,7 @@ import {
   sourceLabel,
 } from '../../data/labels.ts';
 import type { Country, Requirement } from '../../data/schema.ts';
-import { CATEGORY_COLORS } from '../../map/palette.ts';
+import { CATEGORY_COLORS, CATEGORY_INKS } from '../../map/palette.ts';
 import { useStore } from '../../state/store.ts';
 import type { View } from '../../state/useView.ts';
 
@@ -27,7 +27,11 @@ function RequirementCard({
   const stay = formatStay(requirement.maxStayDays);
   const hasRule = requirement.category !== 'citizen' && requirement.category !== 'unknown';
   return (
-    <article className="requirement" data-category={requirement.category}>
+    <article
+      className="requirement"
+      // The answer is stamped in the ink of its colour.
+      style={{ '--stamp': CATEGORY_INKS[requirement.category] } as CSSProperties}
+    >
       <h3>With a passport from {passport.name}</h3>
       <p className="verdict">
         <span className="swatch" style={{ background: CATEGORY_COLORS[requirement.category] }} />
