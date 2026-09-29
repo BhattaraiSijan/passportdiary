@@ -53,7 +53,7 @@ export function App() {
   const selectedCountry = selected ? base.byId.get(selected) : undefined;
   const failed = [passportA, comparing ? passportB : null].find((c) => c && fileErrors[c]);
   // The start screen shows until there is something to put on the pages.
-  const started = Boolean(failed || selectedCountry || passportA);
+  const started = Boolean(failed || passportA);
 
   // The globe is framed again whenever one of these changes what lies over it.
   const reframe = [started, Boolean(view), comparing, compareMode].join();

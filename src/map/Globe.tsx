@@ -243,10 +243,16 @@ export default function Globe({ view, started, reframe = '' }: Props) {
 
   const onClick = useCallback(
     (e: MapLayerMouseEvent) => {
+      // Without a passport there is nothing to show for a country, so a click on
+      // the globe leads to the first step instead: the passport field.
+      if (!hasView) {
+        document.querySelector<HTMLInputElement>('.header [role="combobox"]')?.focus();
+        return;
+      }
       const id = (e.features?.[0]?.properties as { id?: string } | undefined)?.id;
       select(id ?? null);
     },
-    [select],
+    [select, hasView],
   );
 
   const hoverCell = hover?.code ? view?.cells.get(hover.code) : undefined;
@@ -268,7 +274,7 @@ export default function Globe({ view, started, reframe = '' }: Props) {
         pixelRatio={Math.min(window.devicePixelRatio, 2)}
         attributionControl={false}
         interactiveLayerIds={loaded ? INTERACTIVE : []}
-        cursor={hover ? 'pointer' : 'grab'}
+        cursor={hover && hasView ? 'pointer' : 'grab'}
         onLoad={onLoad}
         onResize={onResize}
         onMouseMove={onMouseMove}

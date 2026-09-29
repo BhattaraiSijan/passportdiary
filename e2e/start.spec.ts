@@ -29,6 +29,23 @@ test('keeps the pages away until a passport is chosen', async ({ page }) => {
   await expect(startHeading(page)).toHaveCount(0);
 });
 
+test('a click on the globe before choosing leads to the passport field', async ({ page }) => {
+  const canvas = page.locator('.globe canvas');
+  await expect(canvas).toBeVisible();
+  await page.waitForTimeout(1500);
+  const box = (await canvas.boundingBox())!;
+  // Land is under this point on the start screen, where the globe rises from below.
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height * 0.75);
+
+  await expect(startHeading(page)).toBeVisible();
+  await expect(page.locator('.side, .brief')).toHaveCount(0);
+  await expect(page.getByRole('combobox', { name: 'Your passport' })).toBeFocused();
+
+  await page.keyboard.type('nepal');
+  await page.keyboard.press('Enter');
+  await expect(legendCount(page, 'Visa-free')).toHaveText('11');
+});
+
 test('a returning visitor goes straight to the globe', async ({ page }) => {
   await choose(page, 'Your passport', 'nepal');
   await expect(page.locator('.legend')).toBeVisible();

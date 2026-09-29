@@ -124,7 +124,8 @@ export const useStore = create<State>((set, get) => {
     },
 
     setCompareMode: (compareMode) => set({ compareMode, filter: null }),
-    select: (selected) => set({ selected }),
+    // A country can only be opened once there is a passport to read its rules for.
+    select: (selected) => set({ selected: get().passportA ? selected : null }),
     setFilter: (filter) => set({ filter }),
   };
 });
