@@ -1,30 +1,7 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+import { choose, legendCount, openApp } from './helpers.ts';
 
-async function choose(page: Page, label: string, text: string) {
-  const box = page.getByRole('combobox', { name: label });
-  await box.click();
-  await box.fill(text);
-  await page.keyboard.press('Enter');
-}
-
-const legendCount = (page: Page, label: string) =>
-  page.locator('.legend-item', { hasText: label }).locator('.count');
-
-const pageErrors = new WeakMap<Page, string[]>();
-
-test.beforeEach(async ({ page }) => {
-  const errors: string[] = [];
-  page.on('pageerror', (e) => errors.push(e.message));
-  page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
-  // These tests cover the first design, which is kept under ?design=0.
-  await page.goto('/?design=0');
-  await expect(page.getByRole('heading', { name: 'Where can your passport take you?' })).toBeVisible();
-  pageErrors.set(page, errors);
-});
-
-test.afterEach(({ page }) => {
-  expect(pageErrors.get(page)).toEqual([]);
-});
+openApp();
 
 test('shows the data date and attribution on every view', async ({ page }) => {
   const footer = page.locator('.footer');
@@ -34,19 +11,18 @@ test('shows the data date and attribution on every view', async ({ page }) => {
   await expect(page.getByRole('dialog')).toContainText('Natural Earth');
 });
 
-test('keeps the side panel away until a passport is chosen', async ({ page }) => {
-  await expect(page.locator('.side')).toHaveCount(0);
-  await choose(page, 'Your passport', 'nepal');
-  await expect(page.locator('.side')).toBeVisible();
-});
-
 test('shows entry rules for a Nepali passport', async ({ page }) => {
   await choose(page, 'Your passport', 'nepal');
 
   await expect(legendCount(page, 'Visa-free')).toHaveText('11');
   await expect(legendCount(page, 'Visa required')).toHaveText('115');
+  await expect(page.locator('.summary')).toContainText('29 of 198 destinations');
+  // Each term in the key says what it means.
+  await expect(page.locator('.legend-item', { hasText: 'eVisa' })).toContainText(
+    'Apply online before you travel',
+  );
 
-  // Legend and list are two views of the same numbers.
+  // Key and list are two views of the same numbers.
   const group = page.locator('.group', { hasText: 'Visa-free' });
   await expect(group.locator('.row')).toHaveCount(11);
   await expect(group.getByRole('button', { name: /India/ })).toContainText('Free movement');
@@ -63,17 +39,19 @@ test('explains a destination where the sources disagree', async ({ page }) => {
   await expect(panel.locator('.verdict')).toHaveText('Visa required');
   await expect(panel.locator('.claims')).toContainText('Passport Index: eVisa');
   await expect(panel.locator('.claims')).toContainText('Wikipedia: Visa required');
+  // The key stays within reach while a country is open.
+  await expect(page.locator('.legend')).toBeVisible();
 
   await page.getByRole('button', { name: 'Back to all destinations' }).click();
   await expect(page.getByPlaceholder('Search destinations')).toBeVisible();
 });
 
-test('filters the list from the legend', async ({ page }) => {
+test('filters the list from the key', async ({ page }) => {
   await choose(page, 'Your passport', 'nepal');
   await page.locator('.legend-item', { hasText: 'Visa on arrival' }).click();
   await expect(page.locator('.list .group')).toHaveCount(1);
   await expect(page.locator('.list .row')).toHaveCount(18);
-  await page.getByRole('button', { name: 'Show all' }).click();
+  await page.getByRole('button', { name: 'Show all', exact: true }).click();
   await expect(page.locator('.list .row')).toHaveCount(199);
 });
 
@@ -86,6 +64,7 @@ test('compares two passports', async ({ page }) => {
   await page.getByText('Where they differ').click();
   await expect(legendCount(page, 'Easier with Nepal')).toHaveText('7');
   await expect(legendCount(page, 'Easier with India')).toHaveText('42');
+  await expect(page.locator('.summary')).toContainText('42 destinations are easier with India');
   await expect(page.getByRole('button', { name: /Bangladesh/ })).toContainText('India: Visa required');
 
   await page.getByRole('button', { name: 'Stop comparing' }).click();
@@ -101,15 +80,33 @@ test('remembers the passport on the next visit', async ({ page }) => {
 });
 
 test('draws the globe and opens a country from it', async ({ page, isMobile }) => {
-  // On a wide screen the globe is centred on the page, between legend and side panel.
   if (!isMobile) await page.setViewportSize({ width: 1920, height: 1000 });
   await choose(page, 'Your passport', 'nepal');
   const canvas = page.locator('.globe canvas');
   await expect(canvas).toBeVisible();
-  // The globe centres on the home country, so the middle of the canvas is Nepal.
-  await page.waitForTimeout(1500);
-  const box = (await canvas.boundingBox())!;
-  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  // The globe centres on the home country, between the two pages. Ask the page
+  // where the globe is, and click its middle: that is Nepal.
+  const globe = page.locator('.globe');
+  const place = () =>
+    globe.evaluate((el: HTMLElement) =>
+      ['--globe-x', '--globe-y', '--globe-r'].map((name) =>
+        parseFloat(el.style.getPropertyValue(name)),
+      ),
+    );
+  // Wait until the pages are there and the globe has come to rest between them.
+  await expect(page.locator('.legend')).toBeVisible();
+  await page.waitForTimeout(500);
+  let [x, y, r] = await place();
+  await expect(async () => {
+    const before = [x, y, r];
+    await page.waitForTimeout(400);
+    [x, y, r] = await place();
+    expect([x, y, r]).toEqual(before);
+  }).toPass();
+  await page.waitForTimeout(300);
+  const box = (await globe.boundingBox())!;
+  if (!isMobile) expect(Math.abs(box.x + x! - 960)).toBeLessThan(2);
+  await page.mouse.click(box.x + x!, box.y + y!);
   await expect(page.locator('.panel h2')).toHaveText('Nepal');
 });
 
@@ -125,4 +122,21 @@ test('works from the list when the globe cannot start', async ({ page }) => {
   await expect(page.getByText('This browser cannot draw the globe')).toBeVisible();
   await choose(page, 'Your passport', 'nepal');
   await expect(page.locator('.list .row')).toHaveCount(199);
+});
+
+test('sets key and list on two facing pages of equal size', async ({ page, isMobile }) => {
+  if (!isMobile) await page.setViewportSize({ width: 1360, height: 820 });
+  await choose(page, 'Your passport', 'nepal');
+  const brief = page.locator('.brief');
+  const side = page.locator('.side');
+  await expect(brief.locator('.legend')).toBeVisible();
+  await expect(side.locator('.list .row')).toHaveCount(199);
+  if (isMobile) return;
+  const left = (await brief.boundingBox())!;
+  const right = (await side.boundingBox())!;
+  expect(Math.abs(left.width - right.width)).toBeLessThan(1);
+  expect(Math.abs(left.y - right.y)).toBeLessThan(1);
+  expect(Math.abs(left.height - right.height)).toBeLessThan(1);
+  // Equal margins, so the globe between them is on the centre line of the page.
+  expect(Math.abs(left.x - (1360 - right.x - right.width))).toBeLessThan(1);
 });
