@@ -90,6 +90,12 @@ Next, in rough order:
 4. Street-level basemap when zoomed in (OpenFreeMap, later self-hosted Protomaps)
 5. Territories with their own rules, transit rules, access through residence permits
 
+## Deployment
+
+The site is hosted on GitHub Pages. Every push to `main` runs the checks and the browser
+tests, builds the site and publishes `dist/` (see `.github/workflows/deploy.yml`). Nothing
+is published if a check fails.
+
 ## Licences
 
 Code: MIT, see `LICENSE`. Data in `data/` and `public/data/`: CC BY-SA 4.0 (visa data) and
