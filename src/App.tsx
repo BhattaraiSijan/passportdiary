@@ -47,7 +47,7 @@ export function App() {
 
   const selectedCountry = selected ? base.byId.get(selected) : undefined;
   const failed = [passportA, comparing ? passportB : null].find((c) => c && fileErrors[c]);
-  const waiting = Boolean(passportA) && !view;
+  const showSide = Boolean(failed || selectedCountry || passportA);
 
   return (
     <div className="app">
@@ -65,31 +65,12 @@ export function App() {
         </div>
       </header>
 
-      <main className="stage">
+      <main className={showSide ? 'stage has-side' : 'stage'}>
         <div className="globe-area">
           <GlobeStage view={view} />
           {view && <Legend view={view} />}
-        </div>
-
-        <aside className="side">
-          {failed ? (
-            <div className="panel">
-              <h2>That passport did not load</h2>
-              <p>{fileErrors[failed]}</p>
-              <button type="button" className="button" onClick={() => retryPassport(failed)}>
-                Try again
-              </button>
-            </div>
-          ) : selectedCountry ? (
-            <CountryPanel country={selectedCountry} view={view} />
-          ) : view ? (
-            <DestinationList view={view} />
-          ) : waiting ? (
-            <p className="panel" role="status">
-              Loading entry rules…
-            </p>
-          ) : (
-            <div className="panel welcome">
+          {!showSide && (
+            <div className="intro">
               <h2>Where can your passport take you?</h2>
               <p>
                 Choose your passport above. The globe then shows every country by what you need
@@ -98,7 +79,30 @@ export function App() {
               </p>
             </div>
           )}
-        </aside>
+        </div>
+
+        {/* The side panel only exists once it has something to show. */}
+        {showSide && (
+          <aside className="side">
+            {failed ? (
+              <div className="panel">
+                <h2>That passport did not load</h2>
+                <p>{fileErrors[failed]}</p>
+                <button type="button" className="button" onClick={() => retryPassport(failed)}>
+                  Try again
+                </button>
+              </div>
+            ) : selectedCountry ? (
+              <CountryPanel country={selectedCountry} view={view} />
+            ) : view ? (
+              <DestinationList view={view} />
+            ) : (
+              <p className="panel" role="status">
+                Loading entry rules…
+              </p>
+            )}
+          </aside>
+        )}
       </main>
 
       <Credits meta={base.meta} />

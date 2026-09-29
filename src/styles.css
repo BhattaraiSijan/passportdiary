@@ -15,6 +15,11 @@
   --warn: #8a5a00;
   --warn-wash: #fff4d6;
 
+  /* Every surface carries the same thin edge: never borderless, never heavy. */
+  --edge: 1px solid #0f2a57;
+  --edge-soft: 1px solid var(--line);
+  --edge-on-blue: 1px solid rgb(255 255 255 / 0.55);
+
   --radius: 10px;
   --step--1: 0.833rem;
   --step-0: 1rem;
@@ -71,7 +76,7 @@ input {
 }
 
 :focus-visible {
-  outline: 3px solid var(--green);
+  outline: 2px solid var(--green);
   outline-offset: 2px;
 }
 
@@ -118,10 +123,14 @@ input {
 
 .stage {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
   min-height: 0;
   padding: 0 20px;
+}
+
+.stage.has-side {
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
 }
 
 .globe-area {
@@ -133,11 +142,14 @@ input {
   min-height: 0;
   overflow-y: auto;
   background: var(--paper);
+  border: var(--edge);
   border-radius: var(--radius);
 }
 
 .footer {
+  margin-top: 12px;
   padding: 10px 20px 12px;
+  border-top: var(--edge-on-blue);
   font-size: var(--step--1);
   color: #d6e2f7;
 }
@@ -184,6 +196,7 @@ input {
   font-size: var(--step--1);
   color: var(--paper);
   background: var(--blue-ink);
+  border: var(--edge-on-blue);
   border-radius: 6px;
   pointer-events: none;
   transform: translate(14px, 14px);
@@ -201,6 +214,7 @@ input {
   padding: 8px;
   font-size: var(--step--1);
   background: var(--paper);
+  border: var(--edge);
   border-radius: var(--radius);
 }
 
@@ -217,18 +231,20 @@ input {
 
 .legend-item {
   background: none;
-  border: 0;
+  border: 1px solid transparent;
   border-radius: 6px;
   cursor: pointer;
 }
 
 .legend-item:hover {
   background: var(--blue-wash);
+  border-color: var(--line);
 }
 
 .legend-item[aria-pressed='true'] {
   color: var(--paper);
   background: var(--blue);
+  border-color: var(--blue-ink);
 }
 
 .legend-note {
@@ -277,7 +293,7 @@ input {
   padding: 9px 12px;
   color: var(--ink);
   background: var(--paper);
-  border: 1px solid var(--line);
+  border: var(--edge);
   border-radius: 8px;
 }
 
@@ -295,7 +311,7 @@ input {
   overflow-y: auto;
   color: var(--ink);
   background: var(--paper);
-  border: 1px solid var(--line);
+  border: var(--edge);
   border-radius: 8px;
   box-shadow: 0 12px 28px rgb(15 42 87 / 0.35);
 }
@@ -330,7 +346,7 @@ input {
   font-weight: 600;
   color: var(--blue-ink);
   background: var(--green);
-  border: 1px solid transparent;
+  border: 1px solid var(--green-deep);
   border-radius: 8px;
   cursor: pointer;
 }
@@ -342,7 +358,7 @@ input {
 .header .button-quiet {
   color: var(--paper);
   background: transparent;
-  border-color: rgb(255 255 255 / 0.5);
+  border: var(--edge-on-blue);
 }
 
 .header .button-quiet:hover {
@@ -353,6 +369,7 @@ input {
   padding: 6px 12px;
   color: var(--blue);
   background: var(--blue-wash);
+  border: var(--edge-soft);
 }
 
 .link {
@@ -380,7 +397,7 @@ input {
   display: block;
   padding: 9px 14px;
   color: var(--paper);
-  border: 1px solid rgb(255 255 255 / 0.5);
+  border: var(--edge-on-blue);
   cursor: pointer;
 }
 
@@ -402,11 +419,11 @@ input {
   font-weight: 600;
   color: var(--blue-ink);
   background: var(--green);
-  border-color: var(--green);
+  border-color: var(--green-deep);
 }
 
 .segmented input:focus-visible + span {
-  outline: 3px solid var(--paper);
+  outline: 2px solid var(--paper);
   outline-offset: 2px;
 }
 
@@ -450,7 +467,7 @@ input {
   text-align: left;
   background: none;
   border: 0;
-  border-top: 1px solid var(--blue-wash);
+  border-top: var(--edge-soft);
   cursor: pointer;
 }
 
@@ -472,6 +489,7 @@ input {
   font-size: var(--step--1);
   color: var(--warn);
   background: var(--warn-wash);
+  border: 1px solid #e6c874;
   border-radius: 99px;
 }
 
@@ -504,8 +522,30 @@ input {
   outline: none;
 }
 
-.welcome h2 {
-  font-size: var(--step-2);
+/* Opening prompt, set straight on the stage beside the globe */
+
+.intro {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  z-index: 1;
+  display: grid;
+  gap: 10px;
+  max-width: 30ch;
+  color: var(--paper);
+  pointer-events: none;
+}
+
+.intro h2 {
+  font-size: var(--step-3);
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+}
+
+.intro p {
+  max-width: 34ch;
+  color: #d6e2f7;
 }
 
 .requirement {
@@ -554,6 +594,7 @@ input {
   font-size: var(--step--1);
   color: var(--warn);
   background: var(--warn-wash);
+  border: 1px solid #e6c874;
   border-radius: 8px;
 }
 
@@ -587,7 +628,7 @@ input {
   width: min(560px, calc(100vw - 32px));
   padding: 24px;
   color: var(--ink);
-  border: 0;
+  border: var(--edge);
   border-radius: var(--radius);
 }
 
@@ -629,9 +670,16 @@ input {
     width: min(100%, 320px);
   }
 
-  .stage {
+  .stage,
+  .stage.has-side {
     grid-template-columns: minmax(0, 1fr);
     padding: 0 14px;
+  }
+
+  .intro {
+    position: static;
+    order: -1;
+    max-width: none;
   }
 
   .globe-area {
@@ -642,8 +690,9 @@ input {
   .globe,
   .globe-area > .globe-message {
     position: relative;
-    height: 58vh;
-    min-height: 320px;
+    /* Square, so the globe fills the width without empty space above and below */
+    height: min(100vw - 28px, 58vh);
+    min-height: 300px;
   }
 
   .legend {
