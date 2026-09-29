@@ -31,6 +31,16 @@
   line-height: 1;
 }
 
+/* The name is a button: it leads back to the start screen. */
+.wordmark {
+  padding: 0 2px;
+  letter-spacing: inherit;
+  background: none;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
 .controls {
   display: flex;
   flex-wrap: wrap;

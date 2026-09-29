@@ -32,6 +32,8 @@ export function CompareControls() {
         value={passportB}
         exclude={passportA}
         onChange={(code) => setPassport('B', code)}
+        onClear={() => setPassport('B', null)}
+        clearLabel="Clear second passport"
       />
       {passportB && (
         <fieldset className="segmented">

@@ -9,6 +9,9 @@ interface Props {
   value: string | null;
   exclude?: string | null;
   onChange: (code: string) => void;
+  // Shows a small button in the field that empties it.
+  onClear?: () => void;
+  clearLabel?: string;
 }
 
 const normalise = (text: string) =>
@@ -18,7 +21,16 @@ const normalise = (text: string) =>
     .toLowerCase();
 
 // Searchable combobox following the WAI-ARIA "list autocomplete" pattern.
-export function PassportSelect({ label, placeholder, countries, value, exclude, onChange }: Props) {
+export function PassportSelect({
+  label,
+  placeholder,
+  countries,
+  value,
+  exclude,
+  onChange,
+  onClear,
+  clearLabel = 'Clear passport',
+}: Props) {
   const id = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
@@ -64,7 +76,7 @@ export function PassportSelect({ label, placeholder, countries, value, exclude, 
   };
 
   return (
-    <div className="select">
+    <div className={current && onClear ? 'select has-clear' : 'select'}>
       <label htmlFor={`${id}-input`}>{label}</label>
       <input
         id={`${id}-input`}
@@ -90,6 +102,11 @@ export function PassportSelect({ label, placeholder, countries, value, exclude, 
         }}
         onKeyDown={onKeyDown}
       />
+      {current && onClear && !open && (
+        <button type="button" className="select-clear" aria-label={clearLabel} onClick={onClear}>
+          <span aria-hidden="true">×</span>
+        </button>
+      )}
       {open && (
         <ul id={`${id}-list`} role="listbox" aria-label={label} className="select-list">
           {options.map((c, i) => (

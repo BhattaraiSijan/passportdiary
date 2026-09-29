@@ -23,6 +23,8 @@ interface State {
   init: () => Promise<void>;
   setPassport: (slot: 'A' | 'B', code: string | null) => void;
   retryPassport: (code: string) => void;
+  // Back to the start screen. Nothing is remembered for the next visit.
+  reset: () => void;
   setComparing: (on: boolean) => void;
   setCompareMode: (mode: CompareMode) => void;
   select: (id: string | null) => void;
@@ -34,6 +36,14 @@ function readSaved(): { a?: string; b?: string } {
     return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}') as { a?: string; b?: string };
   } catch {
     return {};
+  }
+}
+
+function forget(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Nothing was stored in that case.
   }
 }
 
@@ -95,6 +105,18 @@ export const useStore = create<State>((set, get) => {
     },
 
     retryPassport: (code) => void fetchFile(code),
+
+    reset: () => {
+      set({
+        passportA: null,
+        passportB: null,
+        comparing: false,
+        compareMode: 'best',
+        selected: null,
+        filter: null,
+      });
+      forget();
+    },
 
     setComparing: (on) => {
       set({ comparing: on, filter: null, compareMode: 'best', ...(on ? {} : { passportB: null }) });

@@ -54,6 +54,39 @@
   pointer-events: none;
 }
 
+/* Empties the field. It sits inside it, left of the arrow. */
+.select-clear {
+  position: absolute;
+  top: 50%;
+  right: 32px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0 0 1px;
+  font-size: 0.9375rem;
+  line-height: 1;
+  color: var(--ink-soft);
+  background: var(--paper);
+  border: 1px solid #8fa6cf;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.select-clear:hover {
+  color: var(--ink);
+  background: var(--blue-wash);
+}
+
+.select-clear:focus-visible {
+  outline-color: var(--blue);
+}
+
+.header .select.has-clear input {
+  padding-right: 58px;
+}
+
 .select-list {
   position: absolute;
   top: 100%;

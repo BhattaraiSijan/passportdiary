@@ -2,8 +2,7 @@
    A printed travel document. The ground is the blue cloth of a passport cover.
    On it lie two white pages and, between them, the globe as a printed plate. */
 
-@import '@fontsource-variable/besley';
-@import '@fontsource-variable/public-sans';
+@import '@fontsource-variable/inter';
 @import './styles/layout.css';
 @import './styles/controls.css';
 @import './styles/globe.css';
@@ -30,8 +29,10 @@
   --ink-soft: #485a7e;
   --on-ground: #ffffff;
   --on-ground-soft: #dfe8fa;
-  --warn: #8a5a00;
-  --warn-wash: #fff4d6;
+  /* Notes where sources disagree: a cool white with a thin amber edge, no yellow fill. */
+  --warn: #6b4a00;
+  --warn-wash: #f7f9fd;
+  --warn-edge: #d9a93a;
 
   /* Every surface has a thin edge: never borderless, never heavy. */
   --line: #ccd7ea;
@@ -56,8 +57,9 @@
   --step-2: 1.44rem;
   --step-3: 1.728rem;
 
-  --font-display: 'Besley Variable', Georgia, serif;
-  --font-text: 'Public Sans Variable', system-ui, sans-serif;
+  /* One neutral family throughout; headings differ by weight and size only. */
+  --font-display: 'Inter Variable', system-ui, sans-serif;
+  --font-text: 'Inter Variable', system-ui, sans-serif;
 
   font-family: var(--font-text);
   font-size: 16px;

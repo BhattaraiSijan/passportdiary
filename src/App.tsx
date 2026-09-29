@@ -24,6 +24,7 @@ export function App() {
   const fileErrors = useStore((s) => s.fileErrors);
   const setPassport = useStore((s) => s.setPassport);
   const retryPassport = useStore((s) => s.retryPassport);
+  const reset = useStore((s) => s.reset);
   const selected = useStore((s) => s.selected);
   const view = useView();
 
@@ -60,7 +61,17 @@ export function App() {
   return (
     <div className={started ? 'app' : 'app is-empty'}>
       <header className="header" data-frame="top">
-        <h1>PassportDiary</h1>
+        <h1>
+          {/* The name is also the way back to the start screen. */}
+          <button
+            type="button"
+            className="wordmark"
+            aria-label="PassportDiary, start over"
+            onClick={reset}
+          >
+            PassportDiary
+          </button>
+        </h1>
         {!started && <Intro />}
         <div className={comparing ? 'controls' : 'controls controls-single'}>
           <PassportSelect
@@ -70,6 +81,7 @@ export function App() {
             value={passportA}
             exclude={comparing ? passportB : null}
             onChange={(code) => setPassport('A', code)}
+            onClear={reset}
           />
           <CompareControls />
         </div>
