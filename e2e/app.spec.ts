@@ -93,18 +93,19 @@ test('draws the globe and opens a country from it', async ({ page, isMobile }) =
         parseFloat(el.style.getPropertyValue(name)),
       ),
     );
-  // Wait until the pages are there and the globe has come to rest between them.
+  // Wait until the globe has left the start screen, where only its top shows,
+  // and has come to rest between the pages.
   await expect(page.locator('.legend')).toBeVisible();
-  await page.waitForTimeout(500);
+  const box = (await globe.boundingBox())!;
   let [x, y, r] = await place();
   await expect(async () => {
     const before = [x, y, r];
-    await page.waitForTimeout(400);
+    await page.waitForTimeout(600);
     [x, y, r] = await place();
+    expect(y! + r!).toBeLessThan(box.height);
     expect([x, y, r]).toEqual(before);
-  }).toPass();
-  await page.waitForTimeout(300);
-  const box = (await globe.boundingBox())!;
+  }).toPass({ timeout: 20_000 });
+  await page.waitForTimeout(600);
   if (!isMobile) expect(Math.abs(box.x + x! - 960)).toBeLessThan(2);
   await page.mouse.click(box.x + x!, box.y + y!);
   await expect(page.locator('.panel h2')).toHaveText('Nepal');
