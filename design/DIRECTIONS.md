@@ -1,9 +1,12 @@
 # Design directions
 
-Three directions, all running in the real app. Open one with `?design=1`, `?design=2` or
-`?design=3`, or use the small switcher in the bottom-left corner (`Now 1 2 3`). The choice is
-kept in localStorage. Without a parameter and with nothing stored, the app shows the design it
-had before, unchanged.
+Direction 1 (Visa page) is the chosen design and the default: the plain address shows it.
+The others stay available for now: `?design=0` is the first design, `?design=2` and
+`?design=3` the other two directions. The small switcher in the bottom-left corner
+(`Now 1 2 3`) does the same, and the choice is kept in localStorage.
+
+Screenshots are made with `npm run design:screens` (dev server on port 5183), for example
+`npm run design:screens -- 1 wide laptop phone`.
 
 Shared by all three:
 
@@ -19,29 +22,40 @@ Shared by all three:
 
 Screenshots are in `design/screens/`, named `<direction>-<wide|laptop|phone>-<state>.png`.
 
-## 1. Visa page
+## 1. Visa page (chosen)
 
-**Concept.** A printed travel document. The start screen is the cover of the passport; choosing
-a passport opens it to paper pages. The globe is a plate in the middle with a ruled ring around
-it, and the answer for a country is stamped on the page.
+**Concept.** A printed travel document. The ground is the blue cloth of the passport cover.
+On it lie two white pages and, between them, the globe as a printed plate with a ruled ring.
+The answer for a country is stamped on the page.
 
 **Palette**
 
 | Role | Hex |
 |---|---|
-| Primary blue (cover, edges, links, figure) | `#21509f` |
-| Deep blue | `#173c7c` |
-| Ink (text) | `#10264d` |
-| Soft ink (secondary text) | `#485a7e` |
-| Secondary green (buttons, start ring, cover emblem) | `#6ecb93` |
+| Ground, centre (glow behind the globe) | `#2a5fb5` |
+| Ground, middle (primary blue) | `#1f4e9c` |
+| Ground, edges | `#143468` |
+| Primary blue on white (links, figure, stamp) | `#21509f` |
+| Deep blue (emblem sea, hover) | `#173c7c` |
+| Ink (text on white, edge of pages, rim of the plate) | `#10264d` |
+| Soft ink (secondary text on white) | `#485a7e` |
+| Secondary green (accent on blue: focus ring, checked control, start ring, emblem land) | `#6ecb93` |
 | Deep green (edges of green) | `#2b8454` |
-| Paper background | `#f0f4fa` |
+| Text on the ground | `#ffffff`, secondary `#dfe8fa` |
+| Hairline on the ground | white at 42% |
 | Page surface | `#ffffff` |
-| Hairline | `#ccd7ea` |
+| Hairline on white | `#ccd7ea` |
 
-Map: sea `#dbe6f6`, home `#10264d`, visa-free `#35a36b`, visa on arrival `#9adbb0`,
+The ground is one radial gradient, `#2a5fb5` at the centre through `#1f4e9c` at 46% to
+`#143468` at the edges, centred a little below the middle so the light sits behind the
+globe. On screens up to 1100px wide it is a vertical gradient of the same three colours.
+There is no pattern.
+
+Map: sea `#d3e0f4`, home `#10264d`, visa-free `#35a36b`, visa on arrival `#9adbb0`,
 ETA `#f0d26b`, eVisa `#8eb2ea`, visa required `#2c5cb0`, no admission `#4a4450`,
 no data `#e3e0d8`. Stripes are white. Faint blue lines of latitude and longitude.
+The plate has a dark ink rim with a white hairline and white tick marks, so the pale sea
+has a firm edge against the blue ground.
 
 The scale runs from green to blue ink, not green to red. A visa is paperwork, not a
 prohibition, and for a weak passport a globe that is mostly red reads as "forbidden".
@@ -50,18 +64,25 @@ Green and blue also stay apart for people with red-green colour blindness.
 **Typefaces.** Besley (headings, wordmark, stamp) and Public Sans (text).
 
 **Layout.** Wordmark centred at the top, passport field centred under it. Two pages of equal
-width and equal height on either side of the globe.
+width and height on either side of the globe. On wide screens the map fills the whole page
+and header, pages and footer lie over it; the globe is framed in the space they leave.
+Between 821 and 1100px the globe is on top and the two pages sit side by side below it.
+On phones everything is one column.
 
 **Key and list.** Separate, but mirrored: the left page is the summary and the key, with one
 line under each term that says what it means and a bar for its share; the right page is the
 list or the opened country. When a country is open the key stays on the left page.
 
-**First visit.** Blue cover, the question in large type, the field with a green ring directly
-under it, four one-tap examples, the globe as a green emblem, and a quiet key along the bottom.
-After choosing, a tip sits at the foot of the left page.
+**First visit.** Wordmark top left. In the centre: the question in large serif type, one
+sentence, the white field with a green ring, and four one-tap examples. A very large globe
+rises from the bottom edge so that only its upper part shows, drawn as the emblem (green land,
+deep blue sea, green ring with fine ticks) with a soft glow. The key "The colours you will
+see" lies over the foot of the globe on a thin-edged dark blue strip. When a passport is
+chosen the globe glides up to its place between the pages and takes its colours; with
+reduced motion it jumps. After that, a tip sits at the foot of the left page.
 
-**Different from the others.** The only light, paper design; the only serif; the only one that
-keeps key and list apart; the calm green-to-blue map.
+**Different from the others.** The only serif; white pages on a blue ground; the only one
+that keeps key and list apart; the calm green-to-blue map.
 
 ## 2. Departures
 
